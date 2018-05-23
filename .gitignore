@@ -5,4 +5,6 @@ data/test/1960/athens_1960_test*
 data/test/1960/athens_1960_export_test.tif.aux.xml
 data/test/1960/reprojected173.tif.aux.xml
 
+data/test/1960/GeoTiff/*
+
 data/test/project.qgs*
