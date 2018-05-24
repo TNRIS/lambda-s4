@@ -36,6 +36,7 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 ##### generate COGs
 9. `cd ./data/test/1960/ && mkdir COG`
 10. `. ./cog_converter.sh` will run a bash script to batch convert all .tif files in 'GeoTiff' folder to cogs in 'COG' folder
+11. `python validate_cloud_optimized_geotiff.py ./COG/01-29-60_4-173.tif` verifies the output is cloud optimized. Had to install gdal python package with Anaconda (`conda install gdal`) to run it
 
 ### Resources
 
