@@ -4,7 +4,7 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 ## Setup
 
 * Install [qGIS](https://qgis.org/en/site/forusers/download.html): `sudo dnf update`, `sudo dnf install qgis qgis-python qgis-grass qgis-server`
-* Install [GDAL](http://trac.osgeo.org/gdal/wiki/DownloadSource): download the .tar.gz, extract and cd into the folder, ./configure, sudo make, sudo make install - or - ubuntu instruction [here](http://www.sarasafavi.com/installing-gdalogr-on-ubuntu.html)
+* Install [GDAL 2.3.0](http://trac.osgeo.org/gdal/wiki/DownloadSource): download the .tar.gz, extract and cd into the folder, ./configure, sudo make, sudo make install (fedora required a separate install of [jasper](http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz) first) - or - ubuntu instruction [here](http://www.sarasafavi.com/installing-gdalogr-on-ubuntu.html)
 * Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/installing.html) and configure with proper key & secret
 
 ## Overview
@@ -15,7 +15,7 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 
 1. scan frame as .tif and georeference, saving world file as per normal procedures
 2. open ArcMap, add georeferenced .tif
-3. export georefenced .tif as .tif with 'NoData' populated for handling the NoData field. This creates and saves a .tif with the proper header information and transparency for cells of no data. Note: this process does create another world file (.tfw) but this can be ignored - we won't be using it
+3. export georefenced .tif as .tif with '256' populated for handling the NoData field. This creates and saves a .tif with the proper header information and transparency for cells of no data. Note: this process does create another world file (.tfw) but this can be ignored - we won't be using it
 
 ## 'Test' Steps
 
@@ -35,8 +35,7 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 
 ##### generate COGs
 9. `cd ./data/test/1960/ && mkdir COG`
-10. `cd ../GeoTiff`
-11. `gdal_translate ./01-29-60_4-173.tif ../COG/01-29-60_4-173.tif -co TILED=YES -co COPY_SRC_OVERVIEWS=YES -co COMPRESS=LZW`
+10. `. ./cog_converter.sh` will run a bash script to batch convert all .tif files in 'GeoTiff' folder to cogs in 'COG' folder
 
 ### Resources
 
