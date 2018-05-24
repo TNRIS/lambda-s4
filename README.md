@@ -27,6 +27,9 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 5. `make put-test-data` from the repo root directory to upload the complete sample group of frames from s3 (GeoTiff folder)
 6. `make get-test-data` from the repo root directory to download the complete sample group of frames from s3 (GeoTiff folder)
 
+7. `gdalbuildvrt ./mosaic.virt ./01-30-60_5-15.tif ./01-30-60_5-30.tif ./02-08-60_6-107.tif ./02-08-60_6-109.tif ./02-0860_6-111.tif ./01-29-60_4-173.tif ./01-29-60_4-175.tif` to create a virt for outlining a merge amongst the sample tifs
+8. `gdal_translate -of GTiff ./mosaic.virt ./mosaic.tif` to perform the mosaic/merge on the sampel tifs
+
 ### Resources
 
 * https://medium.com/planet-stories/a-handy-introduction-to-cloud-optimized-geotiffs-1f2c9e716ec3
