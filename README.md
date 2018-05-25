@@ -30,13 +30,14 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 6. `make get-test-data` from the repo root directory to download the complete sample group of frames from s3 (GeoTiff folder)
 
 ##### quick mosaic test
-7. `gdalbuildvrt ./mosaic.virt ./01-30-60_5-15.tif ./01-30-60_5-30.tif ./02-08-60_6-107.tif ./02-08-60_6-109.tif ./02-0860_6-111.tif ./01-29-60_4-173.tif ./01-29-60_4-175.tif` to create a virt for outlining a merge amongst the sample tifs
+7. `gdalbuildvrt -srcnodata 256 ./mosaic.virt ./01-29-60_4-175.tif ./01-29-60_4-173.tif ./02-0860_6-111.tif ./02-08-60_6-109.tif ./02-08-60_6-107.tif ./01-30-60_5-30.tif ./01-30-60_5-15.tif` to create a virt for outlining a merge amongst the sample tifs
 8. `gdal_translate -of GTiff ./mosaic.virt ./mosaic.tif` to perform the mosaic/merge on the sample tifs
+9. `gdaladdo -ro ./mosaic.tif` to create mosaic overlays (requires gdal v2.3.0!)
 
-##### generate COGs
-9. `cd ./data/test/1960/ && mkdir COG`
-10. `. ./cog_converter.sh` will run a bash script to batch convert all .tif files in 'GeoTiff' folder to cogs in 'COG' folder
-11. `python validate_cloud_optimized_geotiff.py ./COG/01-29-60_4-173.tif` verifies the output is cloud optimized. Had to install gdal python package with Anaconda (`conda install gdal`) to run it
+##### generate COGs and footprint
+10. `cd ./data/test/1960/ && mkdir COG`
+11. `. ./cog_converter.sh` will run a bash script to batch convert all .tif files in 'GeoTiff' folder to cogs in 'COG' folder. will also generate a bounding box footprint for all rasters processed *(except mosaic.tif footprint, but this can easily be implemented by removing the 'if' statement in the shell script)*
+12. **OPTIONAL:** `python validate_cloud_optimized_geotiff.py ./COG/01-29-60_4-173.tif` verifies the output is cloud optimized. Had to install gdal python package with Anaconda (`conda install gdal`) to run it. Implemented into 'cog_converter.sh' script so doesn't need to be run individually
 
 ### Resources
 
