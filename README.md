@@ -11,13 +11,42 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 
 * Repo utilizes the s3 bucket 'tnris-ls4'
 
+---
+
 ## RDS Steps
 
 1. scan frame as .tif and georeference, saving world file as per normal procedures
 2. open ArcMap, add georeferenced .tif
 3. export georefenced .tif as .tif with '256' populated for handling the NoData field. This creates and saves a .tif with the proper header information and transparency for cells of no data. Note: this process does create another world file (.tfw) but this can be ignored - we won't be using it
 
-## 'Test' Steps
+---
+
+## Mapserver/GDAL/s3/Lambda
+
+* Overview
+
+1. list COGs keynames and prepend /vsis3/ and save to a list
+2. use that file list with gdaltindex (gdal v2.3) to shapefile raster tile index
+3. 'Location' column should have `/vsis3/<keyname>.tif`
+4. load the shapefile raster index into PostgreSQL
+5. create Mapserver Map file
+6. Use COGs with dockerized Mapserver/GDAL
+
+* Detail
+
+1. Created RDS and s3 bucket
+2. Created IAM roles for lambda and ec2. Gave both AWSLambdaFullAccess policies
+3. Created EC2 instance and dumped sample tifs into s3 bucket
+4. SSH'd onto ec2 and tested access by pulling down sample tifs from s3 bucket
+5. **Test-** List contents in bucket with folder key: `aws s3 ls --request-payer requester s3://tnris-ls4/test/1960/GeoTiff/`
+6. **Test-** Narrow down list to .tif: `aws s3 ls --request-payer requester s3://tnris-ls4/test/1960/GeoTiff/ | grep ".*\.tif$"`
+7. Write keynames to list: `sudo aws s3 ls --request-payer requester --recursive s3://tnris-ls4/test/1960/GeoTiff/ | grep ".*\.tif$" | awk -F" " '{print $4}' > mylist`
+8. **Test-** Verify list was written with: `cat mylist`
+9. 
+
+---
+
+## Experiment
 
 ##### initial data formatting
 1. Acquired '1960' georeferenced raster tifs from RDC
@@ -39,25 +68,13 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 11. `. ./cog_converter.sh` will run a bash script to batch convert all .tif files in 'GeoTiff' folder to cogs in 'COG' folder. will also generate a bounding box footprint for all rasters processed *(except mosaic.tif footprint, but this can easily be implemented by removing the 'if' statement in the shell script)*
 12. **OPTIONAL:** `python validate_cloud_optimized_geotiff.py ./COG/01-29-60_4-173.tif` verifies the output is cloud optimized. Had to install gdal python package with Anaconda (`conda install gdal`) to run it. Implemented into 'cog_converter.sh' script so doesn't need to be run individually
 
----
-
-### Alternative Approach
+##### Alternative Approach
 1. `. ./alternator.sh`
 
----
-
-### Mapserver/GDAL/S3/Lambda
-
-
----
-
-### Resources
+##### Resources
 
 * https://medium.com/planet-stories/a-handy-introduction-to-cloud-optimized-geotiffs-1f2c9e716ec3
 * https://medium.com/planet-stories/cloud-native-geospatial-part-2-the-cloud-optimized-geotiff-6b3f15c696ed
 * https://trac.osgeo.org/gdal/wiki/CloudOptimizedGeoTIFF
 * http://www.cogeo.org/
-
-Alterative:
-
-* https://astuntech.atlassian.net/wiki/spaces/ISHAREHELP/pages/14844053/Mosaic+thousands+of+raster+images
+* Alternative: https://astuntech.atlassian.net/wiki/spaces/ISHAREHELP/pages/14844053/Mosaic+thousands+of+raster+images
