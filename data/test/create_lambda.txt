@@ -1,0 +1,55 @@
+#### lambda-gdal_translate-cli
+
+aws lambda create-function --region us-east-1 \
+--function-name lambda-gdal_translate-cli \
+--description 'Runs gdal_translate on invocation from AWS CLI' \
+--code S3Bucket=korver.us.east.1,S3Key=lambdaCode/lambda-gdal_translate.zip \
+--role <aws lambda iam arn> \
+--memory-size 960 \
+--timeout 120 \
+--environment Variables="{gdalArgs='-b 1 -b 2 -b 3 -co tiled=yes -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co NUM_THREADS=ALL_CPUS -co COMPRESS=DEFLATE -co PREDICTOR=2', \
+      uploadBucket= 'tnris-ls4', \
+      uploadKeyAcl= 'private', \
+      uploadKeyPrefix= 'cloud-optimize/deflate', \
+      find01= 'rgbir/', \
+      find02= '1m/', \
+      replace01= 'rgb/', \
+      replace02= '100cm/', \
+      largeTiffArgs='-b 1 -b 2 -b 3 -of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR', \
+      smallTiffArgs='-b 1 -b 2 -b 3 -co tiled=yes -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co NUM_THREADS=ALL_CPUS -co COMPRESS=DEFLATE -co PREDICTOR=2'}" \
+--handler index.handler \
+--runtime nodejs6.10
+
+
+#### lambda-gdaladdo-evnt
+
+aws lambda create-function --region us-east-1 \
+    --function-name lambda-gdaladdo-evnt \
+    --description 'Runs gdaladdo to create .ovr file on tif creation event' \
+    --code S3Bucket=korver.us.east.1,S3Key=lambdaCode/lambda-gdaladdo-evnt.zip \
+    --role <aws lambda iam arn> \
+    --memory-size 640 \
+    --timeout 30 \
+    --environment Variables="{uploadBucket='tnris-ls4', \
+      gdaladdoLayers='2 4 8 16 32 64',\
+      gdaladdoArgs='-r average -ro'}" \
+    --handler index.handler \
+    --runtime nodejs6.10
+
+
+#### lambda-gdal_translate-evnt
+
+aws lambda create-function --region us-east-1 \
+    --function-name lambda-gdal_translate-evnt \
+    --description 'Runs gdal_translate on event from S3' \
+    --code S3Bucket=korver.us.east.1,S3Key=lambdaCode/lambda-gdal_translate.zip \
+    --role <aws lambda iam arn> \
+    --memory-size 960 \
+    --timeout 120 \
+    --environment Variables="{gdalArgs='-of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512', \
+          uploadBucket= 'tnris-ls4', \
+          uploadKeyAcl= 'authenticated-read', \
+          find01= 'cloud-optimize/deflate', \
+          replace01= 'cloud-optimize/final'}" \
+    --handler index.handler \
+    --runtime nodejs6.10
