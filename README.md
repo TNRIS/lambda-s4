@@ -39,9 +39,25 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 11. `. ./cog_converter.sh` will run a bash script to batch convert all .tif files in 'GeoTiff' folder to cogs in 'COG' folder. will also generate a bounding box footprint for all rasters processed *(except mosaic.tif footprint, but this can easily be implemented by removing the 'if' statement in the shell script)*
 12. **OPTIONAL:** `python validate_cloud_optimized_geotiff.py ./COG/01-29-60_4-173.tif` verifies the output is cloud optimized. Had to install gdal python package with Anaconda (`conda install gdal`) to run it. Implemented into 'cog_converter.sh' script so doesn't need to be run individually
 
+---
+
+### Alternative Approach
+1. `. ./alternator.sh`
+
+---
+
+### Mapserver/GDAL/S3/Lambda
+
+
+---
+
 ### Resources
 
 * https://medium.com/planet-stories/a-handy-introduction-to-cloud-optimized-geotiffs-1f2c9e716ec3
 * https://medium.com/planet-stories/cloud-native-geospatial-part-2-the-cloud-optimized-geotiff-6b3f15c696ed
 * https://trac.osgeo.org/gdal/wiki/CloudOptimizedGeoTIFF
 * http://www.cogeo.org/
+
+Alterative:
+
+* https://astuntech.atlassian.net/wiki/spaces/ISHAREHELP/pages/14844053/Mosaic+thousands+of+raster+images
