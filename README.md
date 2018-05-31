@@ -42,7 +42,27 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 6. **Test-** Narrow down list to .tif: `aws s3 ls --request-payer requester s3://tnris-ls4/test/1960/GeoTiff/ | grep ".*\.tif$"`
 7. Write keynames to list: `sudo aws s3 ls --request-payer requester --recursive s3://tnris-ls4/test/1960/GeoTiff/ | grep ".*\.tif$" | awk -F" " '{print $4}' > mylist`
 8. **Test-** Verify list was written with: `cat mylist`
-9. 
+9. One at a time, copied each of the 3 `aws lambda create-function....` commands from './data/test/create_lambda.txt' and ran them from the ec2 to create the 3 lambda COG generation functions. They create the function with code pulled from Korver's s3 bucket and set approprate environment variables. **AWS lambda iam ARN removed for git security. need to replace for replication**
+10. In aws console, created a test for the 'lambda-gdal_translate-cli' function with this input json:
+``` json
+{
+"sourceBucket": "aws-naip",
+"sourceKey": "ct/2014/1m/rgbir/41072/m_4107243_nw_18_1_20140721.tif"
+}
+```
+11. Ran test which created new key in bucket: `cloud-optimize/deflate/ct/2014/100cm/rgb/41072/m_4107243_nw_18_1_20140721.tif`
+12. In aws console, opened the 'lambda-gdaladdo-evt' function and configured an s3 event:
+  * Bucket: `tnris-ls4`
+  * Event Type: `Object Created`
+  * Prefix: `cloud-optimize/deflate/`
+  * Filter: `tif`
+13. In aws console, opened the 'lambda-gdal_translate-evt' function and configured an s3 event:
+  * Bucket: `tnris-ls4`
+  * Event Type: `Object Created`
+  * Prefix: `cloud-optimize/deflate/`
+  * Filter: `ovr`
+14. Re-ran test created in step #10. This output the original tif (same as step #11), an .ovr for said tif, and an optimized .tif
+15.
 
 ---
 
