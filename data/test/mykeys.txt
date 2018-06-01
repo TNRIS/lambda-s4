@@ -1,0 +1,7 @@
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/01-29-60_4-173.tif
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/01-29-60_4-175.tif
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/01-30-60_5-15.tif
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/01-30-60_5-30.tif
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/02-08-60_6-107.tif
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/02-08-60_6-109.tif
+/vsis3/tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/02-0860_6-111.tif
