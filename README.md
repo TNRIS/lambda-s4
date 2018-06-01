@@ -68,7 +68,13 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 18. Changed "gdalArgs" environment variable to `-of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=LZW -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512` for lambda-gdal_translate-evnt lambda function to account for the single band
 19. Ran the sequence of lambda functions on 'mylist' of tifs: `cat mylist | grep ".*\.tif$" | awk -F"/" '{print "lambda invoke --function-name lambda-gdal_translate-cli --region us-east-1 --invocation-type Event --payload \x27{\"sourceBucket\":\"tnris-ls4\",\"sourceKey\":\""$0"\"}\x27 log" }' | xargs -n11 -P64 aws`
 20. On local machine( it has gdal installed)::: Create list of output (COG) keys with vsis3 prefix `aws s3 ls --recursive s3://tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/ | grep ".*\.tif$" | awk -F" " '{print "/vsis3/tnris-ls4/" $4}' > mykeys.txt`
-21. Create index shapefile using COG list from previous step `gdaltindex ./index.shp --optfile ./mykeys.txt`
+21. `mkdir index` and then Create index shapefile using COG list from previous step `gdaltindex ./index/index.shp --optfile ./mykeys.txt`
+22. Put the index into s3 `aws s3 cp ./index/ s3://tnris-ls4/cloud-optimize/final/index/ --acl public-read --recursive`
+23. Installed 'shp2pgsql' locally
+24. Uploaded index to postgres `shp2pgsql -s 4326 -d -g the_geom ./index/index.shp test_index |psql -U <username> -p 5432 -h <host> <dbname>`
+25. On ec2 again... `aws s3 sync s3://tnris-ls4/cloud-optimize/final/index /home/ec2-user/mapfiles` to copy the shapefiles from the s3 Bucket
+26. Created 'test.map' mapfile within /mapfiles directory on ec2. sample mapfile located in /data/test/test.map of this repo.
+27. 
 
 ---
 
