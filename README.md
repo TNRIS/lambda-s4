@@ -23,7 +23,7 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 
 ## Mapserver/GDAL/s3/Lambda
 
-* Overview
+* Serving Batch of COGs Overview (Step #20+)
 
 1. list COGs keynames and prepend /vsis3/ and save to a list
 2. use that file list with gdaltindex (gdal v2.3) to shapefile raster tile index
@@ -67,8 +67,8 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 17. Removed `-b 2 -b 3` band arguments, and set 'uploadKeyPrefix' to an empty string on the lambda-gdal_translate-cli lambda environment variables since we are sample testing 1 band rasters (not 3 as with the other naip test tif)
 18. Changed "gdalArgs" environment variable to `-of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=LZW -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512` for lambda-gdal_translate-evnt lambda function to account for the single band
 19. Ran the sequence of lambda functions on 'mylist' of tifs: `cat mylist | grep ".*\.tif$" | awk -F"/" '{print "lambda invoke --function-name lambda-gdal_translate-cli --region us-east-1 --invocation-type Event --payload \x27{\"sourceBucket\":\"tnris-ls4\",\"sourceKey\":\""$0"\"}\x27 log" }' | xargs -n11 -P64 aws`
-20. Create list of output (COG) keys with `aws s3 ls --recursive s3://tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/ | grep ".*\.tif$" | awk -F" " '{print $4}' > mykeys`
-21. 
+20. On local machine( it has gdal installed)::: Create list of output (COG) keys with vsis3 prefix `aws s3 ls --recursive s3://tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/ | grep ".*\.tif$" | awk -F" " '{print "/vsis3/tnris-ls4/" $4}' > mykeys.txt`
+21. Create index shapefile using COG list from previous step `gdaltindex ./index.shp --optfile ./mykeys.txt`
 
 ---
 
