@@ -1,0 +1,33 @@
+LAYER
+  NAME "test_frames"
+  TILEINDEX "test_index"
+  TILEITEM "location"
+  TILESRS "src_srs"
+  STATUS DEFAULT
+  TYPE RASTER
+  METADATA
+    "wms_title" "test-index-20180601"
+  END
+END
+
+
+LAYER
+    NAME test_index
+    CONNECTIONTYPE POSTGIS
+    CONNECTION "host=<host> port=5432 dbname=<dbase name> user=<username> password=<password>"
+    TYPE LINE
+    STATUS DEFAULT
+    DATA "the_geom FROM test_index using unique ogc_fid using srid=4326"
+    PROJECTION
+       "init=epsg:4326"
+    END
+
+    CLASS
+      NAME       "tiles"
+      STYLE
+        COLOR    100 250 100
+      END
+    END
+    #CLOSE_CONNECTION "DEFER"
+
+END
