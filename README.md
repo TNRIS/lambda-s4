@@ -68,13 +68,29 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 18. Changed "gdalArgs" environment variable to `-of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=LZW -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512` for lambda-gdal_translate-evnt lambda function to account for the single band
 19. Ran the sequence of lambda functions on 'mylist' of tifs: `cat mylist | grep ".*\.tif$" | awk -F"/" '{print "lambda invoke --function-name lambda-gdal_translate-cli --region us-east-1 --invocation-type Event --payload \x27{\"sourceBucket\":\"tnris-ls4\",\"sourceKey\":\""$0"\"}\x27 log" }' | xargs -n11 -P64 aws`
 20. On local machine( it has gdal installed)::: Create list of output (COG) keys with vsis3 prefix `aws s3 ls --recursive s3://tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/ | grep ".*\.tif$" | awk -F" " '{print "/vsis3/tnris-ls4/" $4}' > mykeys.txt`
-21. `mkdir index` and then Create index shapefile using COG list from previous step `gdaltindex ./index/index.shp --optfile ./mykeys.txt`
-22. Put the index into s3 `aws s3 cp ./index/ s3://tnris-ls4/cloud-optimize/final/index/ --acl public-read --recursive`
+21. `mkdir index` and then Create index shapefile using COG list from previous step `gdaltindex ./indexSRS/index.shp --optfile ./mykeys.txt`
+22. Put the index into s3 `aws s3 cp ./indexSRS/ s3://tnris-ls4/cloud-optimize/final/index/ --acl public-read --recursive`
 23. Installed 'shp2pgsql' locally
-24. Uploaded index to postgres `shp2pgsql -s 4326 -d -g the_geom ./index/index.shp test_index |psql -U <username> -p 5432 -h <host> <dbname>`
+24. Uploaded index to postgres `shp2pgsql -s 4326 -d -g the_geom ./indexSRS/index.shp test_index |psql -U <username> -p 5432 -h <host> <dbname>`
 25. On ec2 again... `aws s3 sync s3://tnris-ls4/cloud-optimize/final/index /home/ec2-user/mapfiles` to copy the shapefiles from the s3 Bucket
 26. Created 'test.map' mapfile within /mapfiles directory on ec2. sample mapfile located in /data/test/test.map of this repo.
-27. 
+27. `yum install -y docker`
+28. `sudo service docker start`
+29. `sudo docker run --detach -v /home/ec2-user/mapfiles:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver`
+30. `sudo docker exec mapserver touch /var/log/ms_error.log`
+31. `sudo docker exec mapserver chown www-data /var/log/ms_error.log`
+32. `sudo docker exec mapserver chmod 644 /var/log/ms_error.log`. then use `sudo docker exec mapserver cat /var/log/ms_error.log` to view logs.
+
+Working issues:
+
+33. Instructional url (didnt use it)  http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&SERVICE=WMS&LAYERS=test_frames&SRS=epsg:4326&BBOX=-95.7362749,32.2025543,-95.6835030,32.1582697&STYLES=&VERSION=1.1.1&REQUEST=GetMap&WIDTH=256&HEIGHT=256%EF%BB%BF
+34. WMS URL (used in qgis) `http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map` in qgis to connect to sever. *Needed to designate WGS84 as projection and tile size as 512x512*
+35. Went into s3 bucket to make COGs public read.
+36. `http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&SERVICE=WMS&VERSION=1.1.1 &REQUEST=GetCapabilities` to get the GetCapabilites.xml
+37. had installed pip and aws cli in docker but was in vain i believe... skipping here...
+38. created 'lambda-s4-mapserver' user with 'tnris-ls4-mapserver-access' policy permission to access tnris-ls4 bucket.
+39. ***need no data transparency!!!***
+
 
 ---
 
