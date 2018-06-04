@@ -1,33 +1,54 @@
-LAYER
-  NAME "test_frames"
-  TILEINDEX "test_index"
-  TILEITEM "location"
-  TILESRS "src_srs"
-  STATUS DEFAULT
-  TYPE RASTER
-  METADATA
-    "wms_title" "test-index-20180601"
+MAP
+  NAME "sample"
+  STATUS ON
+  UNITS DD
+  IMAGECOLOR 255 255 255
+  CONFIG "MS_ERRORFILE" "/var/log/ms_error.log"
+  CONFIG "AWS_ACCESS_KEY_ID" "<aws access key>"
+  CONFIG "AWS_SECRET_ACCESS_KEY" "<aws secret key>"
+  WEB
+    METADATA
+      "wms_title" "test-index-map"
+      "wms_enable_request" "*"
+    END
   END
-END
+  PROJECTION
+     "init=epsg:4326"
+  END
 
-
-LAYER
-    NAME test_index
-    CONNECTIONTYPE POSTGIS
-    CONNECTION "host=<host> port=5432 dbname=<dbase name> user=<username> password=<password>"
-    TYPE LINE
-    STATUS DEFAULT
-    DATA "the_geom FROM test_index using unique ogc_fid using srid=4326"
+  LAYER
+    NAME "test_frames"
+    TILEINDEX "test_index"
+    TILEITEM "location"
+    TILESRS "src_srs"
+    STATUS ON
+    TYPE RASTER
     PROJECTION
        "init=epsg:4326"
     END
-
-    CLASS
-      NAME       "tiles"
-      STYLE
-        COLOR    100 250 100
-      END
+    METADATA
+      "wms_title" "test-index-20180601"
     END
-    #CLOSE_CONNECTION "DEFER"
+  END
 
+
+  LAYER
+      NAME test_index
+      CONNECTIONTYPE POSTGIS
+      CONNECTION "host=<host address> port=5432 dbname=<dbase> user=<username> password=<password>"
+      TYPE LINE
+      STATUS ON
+      DATA "the_geom FROM test_index"
+      PROJECTION
+         "init=epsg:4326"
+      END
+
+      CLASS
+        NAME       "tiles"
+        STYLE
+          COLOR    100 250 100
+        END
+      END
+      #CLOSE_CONNECTION "DEFER"
+  END
 END
