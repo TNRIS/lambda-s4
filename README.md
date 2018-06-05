@@ -89,7 +89,7 @@ Working issues:
 36. `http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&SERVICE=WMS&VERSION=1.1.1 &REQUEST=GetCapabilities` to get the GetCapabilites.xml
 37. had installed pip and aws cli in docker but was in vain i believe... skipping here...
 38. created 'lambda-s4-mapserver' user with 'tnris-ls4-mapserver-access' policy permission to access tnris-ls4 bucket.
-39. **need no data transparency!!! & higher compression. test in esri (apply new security for twdb ip). s3 files make public. setup wmts**
+39. **need no data transparency!!! & higher compression. test in esri (apply new security for twdb ip). s3 files make public. setup wmts. click for filename(frame #) or display in order.**
 
 
 ---
