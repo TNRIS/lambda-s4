@@ -3,6 +3,7 @@ MAP
   STATUS ON
   UNITS DD
   IMAGECOLOR 255 255 255
+  EXTENT -95.8118 32.1529 -95.6835 32.2617
   CONFIG "MS_ERRORFILE" "/var/log/ms_error.log"
   CONFIG "AWS_ACCESS_KEY_ID" "<aws access key>"
   CONFIG "AWS_SECRET_ACCESS_KEY" "<aws secret key>"
@@ -10,6 +11,7 @@ MAP
     METADATA
       "wms_title" "test-index-map"
       "wms_enable_request" "*"
+      "wms_onlineresource" "http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&"
     END
   END
   PROJECTION
@@ -27,7 +29,7 @@ MAP
        "init=epsg:4326"
     END
     METADATA
-      "wms_title" "test-index-20180601"
+      "wms_title" "test_frames"
     END
   END
 
@@ -35,14 +37,16 @@ MAP
   LAYER
       NAME test_index
       CONNECTIONTYPE POSTGIS
-      CONNECTION "host=<host address> port=5432 dbname=<dbase> user=<username> password=<password>"
+      CONNECTION "host=<host> port=<port> dbname=<dbase name> user=<username> password=<password>"
       TYPE LINE
       STATUS ON
       DATA "the_geom FROM test_index"
       PROJECTION
          "init=epsg:4326"
       END
-
+      METADATA
+        "wms_title" "test_index"
+      END
       CLASS
         NAME       "tiles"
         STYLE
