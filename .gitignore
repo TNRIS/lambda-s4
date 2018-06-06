@@ -11,3 +11,5 @@ data/test/1960/GeoTiff/*
 data/test/1960/COG/*
 
 data/test/project.qgs*
+
+data/test/1960/bandExpand/test\.tif
