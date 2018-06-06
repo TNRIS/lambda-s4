@@ -29,7 +29,7 @@ MAP
        "init=epsg:4326"
     END
     METADATA
-      "wms_title" "test_frames"
+      "wms_title" "Frame"
     END
   END
 
@@ -45,10 +45,10 @@ MAP
          "init=epsg:4326"
       END
       METADATA
-        "wms_title" "test_index"
+        "wms_title" "Frame Boundary"
       END
       CLASS
-        NAME       "tiles"
+        NAME       "Frame Boundary"
         STYLE
           COLOR    100 250 100
         END

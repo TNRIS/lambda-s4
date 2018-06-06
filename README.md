@@ -68,7 +68,8 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 18. Changed "gdalArgs" environment variable to `-of GTiff -a_nodata 256 -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=LZW -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512` for lambda-gdal_translate-evnt lambda function to account for the single band
 19. Ran the sequence of lambda functions on 'mylist' of tifs: `cat mylist | grep ".*\.tif$" | awk -F"/" '{print "lambda invoke --function-name lambda-gdal_translate-cli --region us-east-1 --invocation-type Event --payload \x27{\"sourceBucket\":\"tnris-ls4\",\"sourceKey\":\""$0"\"}\x27 log" }' | xargs -n11 -P64 aws`
 20. On local machine( it has gdal installed)::: Create list of output (COG) keys with vsis3 prefix `aws s3 ls --recursive s3://tnris-ls4/cloud-optimize/final/ct/2014/100cm/rgb/41072/ | grep ".*\.tif$" | awk -F" " '{print "/vsis3/tnris-ls4/" $4}' > mykeys.txt`
-21. `mkdir index` and then Create index shapefile using COG list from previous step `gdaltindex ./indexSRS/index.shp --optfile ./mykeys.txt`
+21. `tac mykeys.txt > mykeys_r.txt` to reverse the order of the frames so index polys are sorted properly. This was done for testing but is not really necessary and can be skipped in the future.
+21. `mkdir indexSRS` and then Create index shapefile using COG list from previous step `gdaltindex -src_srs_name src_srs ./indexSRS/index.shp --optfile ./mykeys_r.txt`
 22. Put the index into s3 `aws s3 cp ./indexSRS/ s3://tnris-ls4/cloud-optimize/final/index/ --acl public-read --recursive`
 23. Installed 'shp2pgsql' locally
 24. Uploaded index to postgres `shp2pgsql -s 4326 -d -g the_geom ./indexSRS/index.shp test_index |psql -U <username> -p 5432 -h <host> <dbname>`
