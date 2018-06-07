@@ -52,7 +52,8 @@ MAP
       CLASS
         NAME       "Frame Boundary"
         STYLE
-          COLOR    100 250 100
+          OUTLINECOLOR    100 250 100
+          OUTLINEWIDTH	2.0
         END
       END
       #CLOSE_CONNECTION "DEFER"
