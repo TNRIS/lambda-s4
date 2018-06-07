@@ -38,14 +38,16 @@ MAP
       NAME test_index
       CONNECTIONTYPE POSTGIS
       CONNECTION "host=<host> port=<port> dbname=<dbase name> user=<username> password=<password>"
-      TYPE LINE
+      TYPE POLYGON
       STATUS ON
       DATA "the_geom FROM test_index"
+      TEMPLATE WMSGetFeatureInfo
       PROJECTION
          "init=epsg:4326"
       END
       METADATA
         "wms_title" "Frame Boundary"
+        "gml_include_items" "all"
       END
       CLASS
         NAME       "Frame Boundary"
