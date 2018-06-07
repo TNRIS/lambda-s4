@@ -48,6 +48,7 @@ MAP
       METADATA
         "wms_title" "Frame Boundary"
         "gml_include_items" "all"
+        "wms_include_items" "all"
       END
       CLASS
         NAME       "Frame Boundary"
