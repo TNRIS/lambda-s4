@@ -90,7 +90,7 @@ Working issues:
 36. `http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&SERVICE=WMS&VERSION=1.1.1 &REQUEST=GetCapabilities` to get the GetCapabilites.xml
 37. had installed pip and aws cli in docker but was in vain i believe... skipping here...
 38. created 'lambda-s4-mapserver' user with 'tnris-ls4-mapserver-access' policy permission to access tnris-ls4 bucket.
-39. **higher compression. s3 files make public. setup wmts. change coordinate system. add filename as attribute to index shp**
+39. **higher compression? s3 files make public. change coordinate system-- all must be 3857 at start. add filename as attribute to index shp. s3 as drive on ubuntu for mapfiles (lambda will create mapfiles and drop in s3, while host ami will have s3 bucket mapped as local drive to access them and provide them to the mapserver docker). setup wmts.**
 40. Added TWDB IP to jenkins security group for testing WMS on esri windows computer
 41.
 
