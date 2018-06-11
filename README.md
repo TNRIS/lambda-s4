@@ -92,7 +92,17 @@ Working issues:
 38. created 'lambda-s4-mapserver' user with 'tnris-ls4-mapserver-access' policy permission to access tnris-ls4 bucket.
 39. **higher compression? s3 files make public. change coordinate system-- all must be 3857 at start. add filename as attribute to index shp. s3 as drive on ubuntu for mapfiles (lambda will create mapfiles and drop in s3, while host ami will have s3 bucket mapped as local drive to access them and provide them to the mapserver docker). setup wmts.**
 40. Added TWDB IP to jenkins security group for testing WMS on esri windows computer
-41.
+
+Mount s3:
+
+41. [used these basic instructions](https://cloudkul.com/blog/mounting-s3-bucket-linux-ec2-instance/) to install fuse and mount s3 as a drive on the server.
+42. setup permissions using lambda-s4-mapserver iam key and secret. be sure to chown the .passwd-s3fs file in the user's $HOME directory to the ec2-user user.
+43. sudo edit /etc/fuse.conf to uncomment out the `user_allow_other` line. this permits mounting the s3 bucket and allowing other users to access it.
+44. `s3fs tnris-ls4 -o multireq_max=5 -o allow_other ./tnris-ls4` to mount. `umount ./tnris-ls4` to unmount.
+45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory
+46. `sudo chown ec2-user ./tnris-ls4/testt/test2.map` change owner of new mapfile. then `chmod 664 ./tnris-ls4/testt/test2.map` to change permission
+**database credentials are in the mapfile! needs to be handled**
+
 
 ---
 
