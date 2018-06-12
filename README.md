@@ -89,19 +89,29 @@ Working issues:
 35. Went into s3 bucket to make COGs public read.
 36. `http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&SERVICE=WMS&VERSION=1.1.1 &REQUEST=GetCapabilities` to get the GetCapabilites.xml
 37. had installed pip and aws cli in docker but was in vain i believe... skipping here...
-38. created 'lambda-s4-mapserver' user with 'tnris-ls4-mapserver-access' policy permission to access tnris-ls4 bucket.
+38. Manually created `lambda-s4-mapserver` user with manually created policy `tnris-ls4-mapserver-access` for use within the mapfiles by the MapServer docker to access tnris-ls4 bucket.
 39. **higher compression? s3 files make public. change coordinate system-- all must be 3857 at start. add filename as attribute to index shp. s3 as drive on ubuntu for mapfiles (lambda will create mapfiles and drop in s3, while host ami will have s3 bucket mapped as local drive to access them and provide them to the mapserver docker). setup wmts.**
 40. Added TWDB IP to jenkins security group for testing WMS on esri windows computer
 
 Mount s3:
 
 41. [used these basic instructions](https://cloudkul.com/blog/mounting-s3-bucket-linux-ec2-instance/) to install fuse and mount s3 as a drive on the server.
-42. setup permissions using lambda-s4-mapserver iam key and secret. be sure to chown the .passwd-s3fs file in the user's $HOME directory to the ec2-user user.
+42. setup permissions using lambda-s4-mapserver iam key and secret. be sure to chown the .passwd-s3fs file in the user's $HOME directory to the ec2-user user. [specific permissions](https://github.com/s3fs-fuse/s3fs-fuse/wiki/Fuse-Over-Amazon) necessary for passwd-s3fs file
 43. sudo edit /etc/fuse.conf to uncomment out the `user_allow_other` line. this permits mounting the s3 bucket and allowing other users to access it.
-44. `s3fs tnris-ls4 -o multireq_max=5 -o allow_other ./tnris-ls4` to mount. `umount ./tnris-ls4` to unmount.
-45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory
-46. `sudo chown ec2-user ./tnris-ls4/testt/test2.map` change owner of new mapfile. then `chmod 664 ./tnris-ls4/testt/test2.map` to change permission
+44. `s3fs tnris-ls4 -o multireq_max=5 -o allow_other ./tnris-ls4` to mount. `sudo umount ./tnris-ls4` to unmount.
+45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory. then run steps 30-32 for logging.
+46. `sudo chown ec2-user ./tnris-ls4/testt/test2.map` change owner of new mapfile. then `chmod 664 ./tnris-ls4/testt/test2.map` to change permission (https://github.com/s3fs-fuse/s3fs-fuse/issues/333)
 **database credentials are in the mapfile! needs to be handled**
+47. set encryption key as environment variable on ec2 instance (and eventually ami), pass it to the docker on run with `-e` flag, then have the mapfiles use it to unencrypt the secrets with a `CONFIG "MS_ENCRYPTION_KEY" ""`
+48. To resolve #46 - python programmatically uploaded mapfiles need to be uploaded to s3 with custom http headers identifying 'ec2-user's uid, gid, and the required mtime & mode.
+``` python
+import boto3
+s3 = boto3.resource('s3')
+s3.Bucket('tnris-ls4').upload_file('/<path to file>/test.map','testt/test2.map',ExtraArgs={'Metadata':{'mode':'33204','uid':'500','gid':'500','mtime':'1528814551'}})
+```
+
+Creating new mapfiles programmatically:
+`sed -i 's/oldstring/newstring/g' filename` to replace string pieces in file
 
 
 ---
