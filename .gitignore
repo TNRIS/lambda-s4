@@ -13,3 +13,5 @@ data/test/1960/COG/*
 data/test/project.qgs*
 
 data/test/1960/bandExpand/test\.tif
+
+ls4-01-gdal_translate/ls4-01-gdal_translate\.zip
