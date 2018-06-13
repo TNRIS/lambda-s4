@@ -71,7 +71,8 @@ aws lambda create-function --region us-east-1 \
     --environment Variables="{gdalArgs='-co tiled=yes -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co NUM_THREADS=ALL_CPUS -co COMPRESS=DEFLATE -co PREDICTOR=2', \
           uploadBucket= 'tnris-ls4', \
           uploadKeyAcl= 'private', \
-          bwBands= '-b 1' \
-          rgbBands= '-b 1 -b 2 -b 3' \
+          bwBands= '-b 1', \
+          rgbBands= '-b 1 -b 2 -b 3', \
+          georefSubDir= 'deflate/'}" \
     --handler index.handler \
     --runtime nodejs6.10

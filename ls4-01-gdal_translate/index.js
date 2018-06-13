@@ -33,6 +33,11 @@ exports.handler = (event, context, callback) => {
       console.log(sourceKey);
       return
     }
+    else if (sourceKey.includes(process.env.georefSubDir)) {
+      console.log("error: key includes the 'georefSubDir' env variable. exiting...");
+      console.log(sourceKey);
+      return
+    }
     else {
       // in case of s3 event triggered by a new overview file  we need to point
       // at the intermediate tif file not ovr
@@ -50,6 +55,7 @@ exports.handler = (event, context, callback) => {
 
       console.log('Upload Bucket: ' + process.env.uploadBucket);
       console.log('Upload Key ACL: ' + process.env.uploadKeyAcl);
+      console.log('Upload Georef Sub Directory: ' + process.env.georefSubDir);
 
       // adjust gdal command for number of bands in raster. if not bw or rgb, just escape
       var bandCmd;
@@ -76,8 +82,11 @@ exports.handler = (event, context, callback) => {
       console.log(systemSync(cmd));
       console.log(systemSync('ls -alh /tmp'));
 
-      // default upload key is same as the source key
-      var uploadKey = sourceKey;
+      // default upload key is same as the source key with added georef sub Directory
+      var srcKeyParts = sourceKey.split("/");
+      var filename = srcKeyParts[srcKeyParts.length-1];
+      var fileWithSubDir = process.env.georefSubDir + filename;
+      var uploadKey = sourceKey.replace(filename, fileWithSubDir);
       console.log('uploadKey: ' + uploadKey);
 
       var body = fs.createReadStream('/tmp/output.tif');
