@@ -10,3 +10,6 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 * Separate processing functions must be run for 1 band (grayscale) vs 3 band (RGB) rasters. The processing functions don't manipulate projection or NoData properties rasters. Therefore, upload prefixes (location) and appropriate formatting is required for the processing pipeline to run.
 
 ---
+
+
+TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure

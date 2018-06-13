@@ -11,9 +11,7 @@ function systemSync(cmd) {
 };
 
 exports.handler = (event, context, callback) => {
-    console.log(event);
-    console.log(context);
-    console.log(process.env);
+    console.log(event.Records[0].s3);
     // If not invoked directly then treat as coming from S3
     if (!event.sourceBucket) {
         if (event.Records[0].s3.bucket.name) {
@@ -29,75 +27,76 @@ exports.handler = (event, context, callback) => {
         var sourceKey =  event.sourceKey;
     }
 
-    // in case of s3 event triggered by a new overview file  we need to point
-    // at the intermediate tif file not ovr
-    if (sourceKey.includes(".ovr")) {
-       sourceKey = sourceKey.replace('.ovr','');
-       console.log ('Stripped .ovr from key');
+    // escape if s3 event triggered by scanned upload or cog output
+    if (!sourceKey.includes('/georef/')) {
+      console.log("error: key doesn't include '/georef/'. exiting...");
+      console.log(sourceKey);
+      return
     }
+    else {
+      // in case of s3 event triggered by a new overview file  we need to point
+      // at the intermediate tif file not ovr
+      // if (sourceKey.includes(".ovr")) {
+      //    sourceKey = sourceKey.replace('.ovr','');
+      //    console.log ('Stripped .ovr from key');
+      // }
 
-    // console.log(JSON.stringify(event), null, 2);
-    console.log('Source Bucket: ' + sourceBucket);
-    console.log('Source Key: ' + sourceKey);
-    console.log('GDAL Args: ' + process.env.gdalArgs);
-    console.log('1st find value: ' + process.env.find01);
-    console.log('1st replace value: ' + process.env.replace01);
-    console.log('2nd find value: ' + process.env.find02);
-    console.log('2nd replace value: ' + process.env.replace02);
-    console.log('Upload Bucket: ' + process.env.uploadBucket);
-    console.log('Upload Key ACL: ' + process.env.uploadKeyAcl);
-    console.log('Upload Key Prefix: ' + process.env.uploadPrefix);
+      console.log('Source Bucket: ' + sourceBucket);
+      console.log('Source Key: ' + sourceKey);
 
-    //
-    // // the AWS access keys will not be neccessary in gdal ver 2.3 due to IAM Role support
-    // const cmd = 'AWS_REQUEST_PAYER=requester'
-    //     + ' GDAL_DISABLE_READDIR_ON_OPEN=YES CPL_VSIL_CURL_ALLOWED_EXTENSIONS=.tif ./bin/gdal_translate '
-    //     + process.env.gdalArgs
-    //     + ' /vsis3/' + sourceBucket + '/' + sourceKey + ' /tmp/output.tif';
-    // console.log('Command to run: ' + cmd);
-    //
-    // // clear contents of tmp dir in case of reuse
-    // console.log(systemSync('rm -fv /tmp/*'));
-    // // run command here should have some error checking
-    // console.log(systemSync(cmd));
-    // console.log(systemSync('ls -alh /tmp'));
-    //
-    // // default upload key is same as the source key
-    // var uploadKey = sourceKey;
-    //
-    // // typically when your are building COGS you want to modify parts of the key name.
-    // // 1st find/replace pair
-    // if (process.env.find01 && process.env.replace01) {
-    //     var uploadKey = uploadKey.replace(process.env.find01, process.env.replace01);
-    // }
-    //
-    // // 2nd find and replace pair
-    // if (process.env.find02 && process.env.replace02) {
-    //     var uploadKey = uploadKey.replace(process.env.find02, process.env.replace02);
-    // }
-    //
-    // // mostly for testing. allows you modify root of key name.
-    // if (process.env.uploadKeyPrefix) {
-    //     var uploadKey = process.env.uploadKeyPrefix + '/' + uploadKey;
-    // }
-    // console.log('uploadKey: ' + uploadKey);
-    //
-    // var body = fs.createReadStream('/tmp/output.tif');
-    //
-    // // when writing to your own bucket 'authenticated-read'
-    // // or
-    // // when writing to another account's bucket 'bucket-owner-full-control'
-    // var s3obj = new aws.S3({params: {Bucket: process.env.uploadBucket,
-    //     Key: uploadKey,
-    //     ACL: process.env.uploadKeyAcl,
-    //     ContentType: 'image/tiff'
-    // }});
-    //
-    // // upload output of the gdal util to S3
-    // s3obj.upload({Body: body})
-    //     .on('httpUploadProgress', function(evt) {
-    //         //console.log(evt);
-    //         })
-    //     .send(function(err, data) {callback(err, 'Process complete!');}
-    // )
+      console.log('GDAL Args: ' + process.env.gdalArgs);
+      console.log('rgbBands: ' + process.env.rgbBands);
+      console.log('bwBands: ' + process.env.bwBands);
+
+      console.log('Upload Bucket: ' + process.env.uploadBucket);
+      console.log('Upload Key ACL: ' + process.env.uploadKeyAcl);
+
+      // adjust gdal command for number of bands in raster. if not bw or rgb, just escape
+      var bandCmd;
+      if (sourceKey.includes('bw/')) {
+        bandCmd = process.env.bwBands + " ";
+      }
+      else if (sourceKey.includes('rgb/')) {
+        bandCmd = process.env.rgbBands + " ";
+      }
+      else {
+        console.log("error: key doesn't include 'bw/' or 'rgb/'. exiting...");
+        return
+      }
+
+      const cmd = 'AWS_REQUEST_PAYER=requester'
+          + ' GDAL_DISABLE_READDIR_ON_OPEN=YES CPL_VSIL_CURL_ALLOWED_EXTENSIONS=.tif ./bin/gdal_translate '
+          + bandCmd + process.env.gdalArgs
+          + ' /vsis3/' + sourceBucket + '/' + sourceKey + ' /tmp/output.tif';
+      console.log('Command to run: ' + cmd);
+
+      // clear contents of tmp dir in case of reuse
+      console.log(systemSync('rm -fv /tmp/*'));
+      // run command here should have some error checking
+      console.log(systemSync(cmd));
+      console.log(systemSync('ls -alh /tmp'));
+
+      // default upload key is same as the source key
+      var uploadKey = sourceKey;
+      console.log('uploadKey: ' + uploadKey);
+
+      var body = fs.createReadStream('/tmp/output.tif');
+
+      // when writing to your own bucket 'authenticated-read'
+      // or
+      // when writing to another account's bucket 'bucket-owner-full-control'
+      var s3obj = new aws.S3({params: {Bucket: process.env.uploadBucket,
+          Key: uploadKey,
+          ACL: process.env.uploadKeyAcl,
+          ContentType: 'image/tiff'
+      }});
+
+      // upload output of the gdal util to S3
+      s3obj.upload({Body: body})
+          .on('httpUploadProgress', function(evt) {
+              //console.log(evt);
+              })
+          .send(function(err, data) {callback(err, 'Process complete!');}
+      )
+    }
 };

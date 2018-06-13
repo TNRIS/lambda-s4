@@ -53,3 +53,30 @@ aws lambda create-function --region us-east-1 \
           replace01= 'cloud-optimize/final'}" \
     --handler index.handler \
     --runtime nodejs6.10
+
+####
+####
+####
+####
+####
+####
+
+aws lambda create-function --region us-east-1 \
+    --function-name ls4-01-gdal_translate \
+    --description 'Runs gdal_translate from AWS CLI for initial compression' \
+    --zip-file fileb://ls4-01-gdal_translate.zip \
+    --role <aws lambda iam arn> \
+    --memory-size 960 \
+    --timeout 200 \
+    --environment Variables="{gdalArgs='-b 1 -co tiled=yes -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co NUM_THREADS=ALL_CPUS -co COMPRESS=DEFLATE -co PREDICTOR=2', \
+          uploadBucket= 'tnris-ls4', \
+          uploadKeyAcl= 'private', \
+          uploadKeyPrefix= 'cloud-optimize/deflate', \
+          find01= 'rgbir/', \
+          find02= '1m/', \
+          replace01= 'rgb/', \
+          replace02= '100cm/', \
+          largeTiffArgs='-b 1 -of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR', \
+          smallTiffArgs='-b 1 -co tiled=yes -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co NUM_THREADS=ALL_CPUS -co COMPRESS=DEFLATE -co PREDICTOR=2'}" \
+    --handler index.handler \
+    --runtime nodejs6.10
