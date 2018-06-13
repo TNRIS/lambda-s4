@@ -50,23 +50,23 @@ exports.handler = (event, context, callback) => {
       console.log('Source Key: ' + sourceKey);
 
       console.log('GDAL Args: ' + process.env.gdalArgs);
-      console.log('rgbBands: ' + process.env.rgbBands);
+      console.log('ncBands: ' + process.env.ncBands);
       console.log('bwBands: ' + process.env.bwBands);
 
       console.log('Upload Bucket: ' + process.env.uploadBucket);
       console.log('Upload Key ACL: ' + process.env.uploadKeyAcl);
       console.log('Upload Georef Sub Directory: ' + process.env.georefSubDir);
 
-      // adjust gdal command for number of bands in raster. if not bw or rgb, just escape
+      // adjust gdal command for number of bands in raster. if not bw or nc, just escape
       var bandCmd;
       if (sourceKey.includes('bw/')) {
         bandCmd = process.env.bwBands + " ";
       }
-      else if (sourceKey.includes('rgb/')) {
-        bandCmd = process.env.rgbBands + " ";
+      else if (sourceKey.includes('nc/')) {
+        bandCmd = process.env.ncBands + " ";
       }
       else {
-        console.log("error: key doesn't include 'bw/' or 'rgb/'. exiting...");
+        console.log("error: key doesn't include 'bw/' or 'nc/'. exiting...");
         return
       }
 

@@ -8,7 +8,7 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 * Repo utilizes the s3 bucket 'tnris-ls4'
 * Steps of the workflow/process outlined below step-by-step. Each step is stored within its own directory in this repo, numbered in order as `ls4-<step #>-gdal_<gdal command>`
 * [RDC Steps](https://github.com/TNRIS/lambda-s4/wiki/RDC---Individual-Frames,-Indexes,-&-Lake-Gallery-Mosaics) found in this repo's
-* Separate processing functions must be run for 1 band (grayscale) vs 3 band (RGB) rasters. The processing functions don't manipulate projection or NoData properties rasters. Therefore, upload prefixes (location) and appropriate formatting is required for the processing pipeline to run.
+* Separate processing functions must be run for 1 band (grayscale) vs 3 band (natural color) rasters. The processing functions don't manipulate projection or NoData properties rasters. Therefore, upload prefixes (location) and appropriate formatting is required for the processing pipeline to run.
 * Discovery of process and testing information outlined within `explroation_instructional.md` with all associated files within the './data' folder of this repo
 
 ---
@@ -23,4 +23,4 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure
 * any non .tif or .ovr files
 * folder structure
-* file name structure 
+* file name structure
