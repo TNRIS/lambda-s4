@@ -68,7 +68,7 @@ exports.handler = (event, context, callback) => {
       // the AWS access keys will not be neccessary in gdal ver 2.3 due to IAM Role support
       const cmd = 'AWS_REQUEST_PAYER=requester'
           + ' GDAL_DISABLE_READDIR_ON_OPEN=YES CPL_VSIL_CURL_ALLOWED_EXTENSIONS=.tif ./bin/gdal_translate '
-          + process.env.gdalCmd
+          + gdalCmd
           + ' /vsis3/' + sourceBucket + '/' + sourceKey + ' /tmp/output.tif';
       console.log('Command to run: ' + cmd);
 
