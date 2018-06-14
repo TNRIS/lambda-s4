@@ -62,9 +62,9 @@ aws lambda create-function --region us-east-1 \
 ####
 01
 aws lambda create-function --region us-east-1 \
-    --function-name ls4-01-gdal_translate \
+    --function-name ls4-01-compress \
     --description 'Runs gdal_translate on uploaded 'georef' tif for initial compression' \
-    --zip-file fileb://ls4-01-gdal_translate.zip \
+    --zip-file fileb://ls4-01-compress.zip \
     --role <aws lambda iam arn> \
     --memory-size 960 \
     --timeout 200 \
@@ -78,9 +78,9 @@ aws lambda create-function --region us-east-1 \
     --runtime nodejs6.10
 02
 aws lambda create-function --region us-east-1 \
-    --function-name ls4-02-gdaladdo \
+    --function-name ls4-02-overviews \
     --description 'Runs gdaladdo to create .ovr file on tif from ls4-01' \
-    --zip-file fileb://ls4-02-gdaladdo.zip \
+    --zip-file fileb://ls4-02-overviews.zip \
     --role <aws lambda iam arn> \
     --memory-size 640 \
     --timeout 120 \
@@ -91,3 +91,17 @@ aws lambda create-function --region us-east-1 \
     --handler index.handler \
     --runtime nodejs6.10
 03
+aws lambda create-function --region us-east-1 \
+    --function-name ls4-03-cog \
+    --description 'Runs gdal_translate to create COG from ls4-02 tif/ovr' \
+    --zip-file fileb://ls4-03-cog.zip \
+    --role <aws lambda iam arn> \
+    --memory-size 960 \
+    --timeout 120 \
+    --environment Variables="{ncGdalArgs='-of GTiff -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=JPEG -co JPEG_QUALITY=85 -co PHOTOMETRIC=YCBCR -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512', \
+          bwGdalArgs='-of GTiff -ot Byte -a_nodata 256 -co TILED=YES -co BLOCKXSIZE=512 -co BLOCKYSIZE=512 -co COMPRESS=DEFLATE -co COPY_SRC_OVERVIEWS=YES --config GDAL_TIFF_OVR_BLOCKSIZE 512', \
+          uploadBucket= 'tnris-ls4', \
+          uploadKeyAcl= 'public-read', \
+          georefSubDir= 'deflate/'}" \
+    --handler index.handler \
+    --runtime nodejs6.10
