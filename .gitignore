@@ -15,3 +15,9 @@ data/test/project.qgs*
 data/test/1960/bandExpand/test\.tif
 
 ls4-01-gdal_translate/ls4-01-gdal_translate\.zip
+
+ls4-01-compress/ls4-01-compress\.zip
+
+ls4-02-overviews/ls4-02-overviews\.zip
+
+ls4-03-cog/ls4-03-cog\.zip
