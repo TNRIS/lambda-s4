@@ -3,6 +3,9 @@
 const child_process = require('child_process');
 const aws = require('aws-sdk');
 const s3 = new aws.S3();
+const lambda = new aws.Lambda({
+  region: 'us-east-1' //change to your region
+});
 const exec = require('child_process').execSync;
 const fs = require('fs');
 
@@ -105,7 +108,25 @@ exports.handler = (event, context, callback) => {
           .on('httpUploadProgress', function(evt) {
               //console.log(evt);
               })
-          .send(function(err, data) {callback(err, 'Process complete!');}
+          .send(function(err, data) {
+            console.log(data);
+            const payload = {sourceBucket: process.env.uploadBucket,sourceKey: uploadKey}
+            lambda.invoke({
+              ClientContext: "ls4-01",
+              FunctionName: "ls4-02-gdaladdo",
+              InvocationType: "Event",
+              Payload: JSON.stringify(payload) // pass params
+            }, function(error, data) {
+              if (error) {
+                context.done('error', error);
+              }
+              if(data.Payload){
+                console.log("ls4-02-gdaladdo invoked!")
+                context.succeed(data.Payload)
+              }
+            });
+            callback(err, 'Process complete!');
+          }
       )
     }
 };

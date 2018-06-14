@@ -60,10 +60,10 @@ aws lambda create-function --region us-east-1 \
 ####
 ####
 ####
-
+01
 aws lambda create-function --region us-east-1 \
     --function-name ls4-01-gdal_translate \
-    --description 'Runs gdal_translate from AWS CLI for initial compression' \
+    --description 'Runs gdal_translate on uploaded 'georef' tif for initial compression' \
     --zip-file fileb://ls4-01-gdal_translate.zip \
     --role <aws lambda iam arn> \
     --memory-size 960 \
@@ -76,3 +76,18 @@ aws lambda create-function --region us-east-1 \
           georefSubDir= 'deflate/'}" \
     --handler index.handler \
     --runtime nodejs6.10
+02
+aws lambda create-function --region us-east-1 \
+    --function-name ls4-02-gdaladdo \
+    --description 'Runs gdaladdo to create .ovr file on tif from ls4-01' \
+    --zip-file fileb://ls4-02-gdaladdo.zip \
+    --role <aws lambda iam arn> \
+    --memory-size 640 \
+    --timeout 120 \
+    --environment Variables="{uploadBucket='tnris-ls4', \
+      gdaladdoLayers='2 4 8 16 32 64',\
+      gdaladdoArgs='-r average -ro',
+      georefSubDir= 'deflate/'}" \
+    --handler index.handler \
+    --runtime nodejs6.10
+03

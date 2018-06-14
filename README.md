@@ -15,10 +15,11 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 
 ## The Workflow
 
-1. RDC uploads scanned image to  appropriate `.../scanned/...` directory in the tree for storage. No other event happen.
-2. RDC uploads georeferenced image to appropriate `.../georef/...` directory in the tree. This fires the first lambda event.
-3. `ls4-01-gdal_translate` runs generic DEFLATE compression on georeferenced tif and reuploads to same key but in a sub directory (environment variable defined). This fires the second lambda event.
-4.
+1. RDC uploads scanned image to  appropriate `.../scanned/...` directory in the tree for storage. No other event happens (this is just for availability to download at other times).
+2. RDC uploads georeferenced image to appropriate `.../georef/...` directory in the tree. This triggers the first lambda function by an event wired to monitor the bucket for all tif extensions.
+3. `ls4-01-gdal_translate` runs generic DEFLATE compression on georeferenced tif and reuploads to same key but in a sub directory (environment variable defined). Then it invokes the second lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
+4. `ls2-01-gdaladdo` creates overviews on the compressed tif and dumps them alongside it in the sub directory. This function has a sub directory environment variable which it verifies is part of the compressed tif key in order to run -- this means the sub directory environment variable for both functions must be the same.
+5.
 
 TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure
 * any non .tif or .ovr files
