@@ -21,3 +21,4 @@ ls4-01-compress/ls4-01-compress\.zip
 ls4-02-overviews/ls4-02-overviews\.zip
 
 ls4-03-cog/ls4-03-cog\.zip
+data/input_epsg3857/*.tif.aux.xml
