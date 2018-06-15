@@ -39,7 +39,8 @@ def lambda_handler(event, context):
         for cog in response['Contents']:
             prefix = 's3://' + source_bucket + '/'
             s3_path = prefix + cog['Key']
-            cog_keys.append(s3_path)
+            if 'tile_index' not in s3_path:
+                cog_keys.append(s3_path)
         if 'NextContinuationToken' in response.keys():
             get_keys(response['NextContinuationToken'])
     get_keys()
@@ -50,7 +51,6 @@ def lambda_handler(event, context):
     # fille shapefile data container
     for key in cog_keys:
         with rasterio.open(key) as dataset:
-            print(dataset.profile)
             location = key.replace('s3://', '/vsis3/')
             bounds = dataset.bounds
             df = df.append({'location':location, 'src_srs': src_srs, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)
@@ -59,7 +59,7 @@ def lambda_handler(event, context):
     # setup upload keys
     band = source_key.split("/")[0]
     band_pre = band + "/"
-    index_name = key_path.replace(band_pre, '').replace('cog/', '').replace('/', '_')
+    index_name = key_path.replace(band_pre, '').replace('/cog/', '').replace('/', '_')
     print(index_name)
     shp_key = key_path + "tile_index/" + index_name
     print(shp_key)
