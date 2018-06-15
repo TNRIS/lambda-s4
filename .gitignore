@@ -22,3 +22,11 @@ ls4-02-overviews/ls4-02-overviews\.zip
 
 ls4-03-cog/ls4-03-cog\.zip
 data/input_epsg3857/*.tif.aux.xml
+
+ls4-04-shp_index/tile_index\.cpg
+
+ls4-04-shp_index/tile_index\.dbf
+
+ls4-04-shp_index/tile_index\.shp
+
+ls4-04-shp_index/tile_index\.shx

@@ -108,10 +108,10 @@ aws lambda create-function --region us-east-1 \
 04
 aws lambda create-function --region us-east-1 \
     --function-name ls4-04-shp_index \
-    --description 'Runs gdaltindex to create bounding box footprint shapefile from ../cog/' \
+    --description 'Python function to create bounding box footprint shapefile from ../cog/' \
     --zip-file fileb://ls4-04-shp_index.zip \
     --role <aws lambda iam arn> \
     --memory-size 960 \
     --timeout 120 \
-    --handler index.handler \
-    --runtime nodejs6.10
+    --handler lambda_function.lambda_handler \
+    --runtime python3.6
