@@ -22,6 +22,12 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 5. `ls4-03-cog` creates the cloud optimized geotiff (COG) from tif and ovr in the sub directory. Then it invokes the fourth lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
 6. `ls4-04-shp_index` creates the shapefile tile index of all COGs in s3 for the collection. drops it off in s3.
 
+---
+
+## Deployment
+
+* `ls4-04-shp_index` python requires packing dependencies into zipfile for deployment. Do this by running `make pack-ls4-04-shp_index` from the repo folder
+
 TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure
 * any non .tif or .ovr files
 * folder structure

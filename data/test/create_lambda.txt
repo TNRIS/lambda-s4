@@ -109,7 +109,7 @@ aws lambda create-function --region us-east-1 \
 aws lambda create-function --region us-east-1 \
     --function-name ls4-04-shp_index \
     --description 'Python function to create bounding box footprint shapefile from ../cog/' \
-    --zip-file fileb://ls4-04-shp_index.zip \
+    --code S3Bucket=tnris-ls4,S3Key=ls4-04-shp_index.zip \
     --role <aws lambda iam arn> \
     --memory-size 960 \
     --timeout 120 \

@@ -76,5 +76,4 @@ def lambda_handler(event, context):
 
 
 if __name__ == '__main__':
-    test = {'sourceBucket': 'tnris-ls4', 'sourceKey': 'bw/countyDelete/agencyDelete_YYYY/frames/cog/02-08-60_6-107.tif'}
-    lambda_handler(test, context='context')
+    lambda_handler(event='event', context='context')

@@ -38,3 +38,7 @@ data/input_epsg3857/01-29-60_4-175\.tif
 data/input_epsg3857/01-30-60_5-15\.tif
 
 data/input_epsg3857/
+
+ls4-04-shp_index/*
+!ls4-04-shp_index/lambda_function.py
+!ls4-04-shp_index/requirements.txt

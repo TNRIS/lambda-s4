@@ -10,3 +10,8 @@ put-test-cogs:
 
 get-test-cogs:
 	aws s3 cp s3://tnris-ls4/test/1960/COG/ ./data/test/1960/COG/ --recursive
+
+pack-%:
+	echo $(VIRTUAL_ENV)/lib/python3.6/site-packages/.
+	echo ./$(subst pack-,,$(subst --,%,$@))/
+	cp -r $(VIRTUAL_ENV)/lib/python3.6/site-packages/. ./$(subst pack-,,$(subst --,%,$@))/
