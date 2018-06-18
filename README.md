@@ -24,6 +24,10 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 
 ---
 
+## Rasterio needs ManyLinux Wheels
+
+* `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`
+
 ## Deployment
 
 * `ls4-04-shp_index` python requires packing dependencies into zipfile for deployment. Do this by running `make pack-ls4-04-shp_index` from the repo folder
