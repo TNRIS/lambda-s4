@@ -30,3 +30,5 @@ ls4-04-shp_index/tile_index\.dbf
 ls4-04-shp_index/tile_index\.shp
 
 ls4-04-shp_index/tile_index\.shx
+
+data/input_epsg3857_/*
