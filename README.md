@@ -26,7 +26,7 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 
 ## Rasterio needs ManyLinux Wheels
 
-* `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`
+* `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`. Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...). [idea here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff) and [here](https://github.com/lambci/docker-lambda) and [here](https://github.com/perrygeo/lambda-rasterio). getting atime to work [required this](https://bugzilla.redhat.com/show_bug.cgi?id=756670)
 
 ## Deployment
 

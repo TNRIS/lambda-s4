@@ -57,7 +57,7 @@ def lambda_handler(event, context):
             bounds = dataset.bounds
             df = df.append({'location':location, 'src_srs': src_srs, 'dl_orig': dl_orig, 'dl_georef': dl_georef, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)
     # write shapefile
-    df.to_file("tile_index.shp")
+    df.to_file("/tmp/tile_index.shp")
     # setup upload keys
     band = source_key.split("/")[0]
     band_pre = band + "/"
@@ -68,7 +68,7 @@ def lambda_handler(event, context):
     # upload shapefile
     shp_suffixes = ['.cpg', '.dbf', '.shp', '.shx']
     for sfx in shp_suffixes:
-        filename = 'tile_index' + sfx
+        filename = '/tmp/tile_index' + sfx
         keyname = shp_key + sfx
         print('uploading: ' + keyname)
         client.upload_file(filename, source_bucket, keyname)
