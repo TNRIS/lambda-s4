@@ -95,7 +95,24 @@ exports.handler = (event, context, callback) => {
           .on('httpUploadProgress', function(evt) {
               //console.log(evt);
               })
-          .send(function(err, data) {callback(err, 'Process complete!');}
+          .send(function(err, data) {
+            console.log(data);
+            const payload = {sourceBucket: process.env.uploadBucket,sourceKey: uploadKey}
+            lambda.invoke({
+              ClientContext: "ls4-03",
+              FunctionName: "ls4-04-shp_index",
+              InvocationType: "Event",
+              Payload: JSON.stringify(payload) // pass params
+            }, function(error, data) {
+              if (error) {
+                context.done('error', error);
+              }
+              if(data.Payload){
+                console.log("ls4-04-shp_index invoked!")
+                context.succeed(data.Payload)
+              }
+            });
+            callback(err, 'Process complete!');}
       )
     }
 };

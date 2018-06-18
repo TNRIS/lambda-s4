@@ -46,14 +46,16 @@ def lambda_handler(event, context):
     get_keys()
     print(str(len(cog_keys)) + " COG keys found.")
     # setup container for shapefile data
-    df = gpd.GeoDataFrame(columns=['location','src_srs','geometry'])
+    df = gpd.GeoDataFrame(columns=['location','src_srs','dl_orig','dl_georef','geometry'])
     src_srs = "EPSG:3857"
     # fille shapefile data container
     for key in cog_keys:
         with rasterio.open(key) as dataset:
             location = key.replace('s3://', '/vsis3/')
+            dl_orig = key.replace('s3://', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
+            dl_georef = key.replace('s3://', 'https://s3.amazonaws.com/')
             bounds = dataset.bounds
-            df = df.append({'location':location, 'src_srs': src_srs, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)
+            df = df.append({'location':location, 'src_srs': src_srs, 'dl_orig': dl_orig, 'dl_georef': dl_georef, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)
     # write shapefile
     df.to_file("tile_index.shp")
     # setup upload keys
