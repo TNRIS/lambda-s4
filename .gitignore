@@ -42,5 +42,4 @@ data/input_epsg3857/
 ls4-04-shp_index/*
 !ls4-04-shp_index/lambda_function.py
 !ls4-04-shp_index/requirements.txt
-!ls4-04-shp_index/dep_whitelist.txt
-!ls4-04-shp_index/dep_cleanup
+!ls4-04-shp_index/dep_cleanup.py

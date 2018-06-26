@@ -26,7 +26,20 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 
 ## Rasterio needs ManyLinux Wheels
 
-* `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`. Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...). [idea here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff) and [here](https://github.com/lambci/docker-lambda) and [here](https://github.com/perrygeo/lambda-rasterio). getting atime to work [required this](https://bugzilla.redhat.com/show_bug.cgi?id=756670)
+* `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`
+* Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...).
+* This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).
+* General 'atime' process to removed unused dependency files:
+  1. enable atime file metadata
+  2. cd into function and install requirements
+  3. create arbitrary file to compare against (`touch start`)
+  4. run function
+  5. create txt list of files with atime later than arbitrary file. these are the files in the dependencies that are actually used by the function: `find <path to function> -type f -anewer ./start > dep_whitelist.txt`
+  6. run dep_cleanup.py (depends on 'dep_whitelist.txt' file) to remove all unused files from function folder
+  7. zip function and deploy
+* Originally: 7,716 items - 344.0 MB
+* After dep_cleanup: 2,072 items - 344.0 MB
+
 
 ## Deployment
 
