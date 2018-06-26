@@ -42,8 +42,9 @@ TODO:
   6. run dep_cleanup.py (depends on 'dep_whitelist.txt' file) to remove all unused files from function folder
   7. zip function and deploy
 * Originally: 7,716 items - 344.0 MB
-* After dep_cleanup: 2,072 items - 344.0 MB
+* After dep_cleanup: 2,072 items - 154.0 MB (44 MB compressed!)
 
+---
 
 ## Deployment
 
