@@ -89,7 +89,7 @@ def lambda_handler(event, context):
         filename = '/tmp/tile_index' + sfx
         keyname = shp_key + sfx
         print('uploading: ' + keyname)
-        client.upload_file(filename, source_bucket, keyname)
+        client.upload_file(filename, source_bucket, keyname, ExtraArgs={'ACL':'public-read'})
     print("upload success!")
 
     # upload geodataframe to postgis
