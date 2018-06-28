@@ -100,6 +100,7 @@ Mount s3:
 43. sudo edit /etc/fuse.conf to uncomment out the `user_allow_other` line. this permits mounting the s3 bucket and allowing other users to access it.
 44. `s3fs tnris-ls4 -o multireq_max=5 -o allow_other ./tnris-ls4` to mount. `sudo umount ./tnris-ls4` to unmount.
 45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory. then run steps 30-32 for logging.
+**NOTE: s3 directory 'testt' must be owned by ec2-user with 0775 access applied**
 46. `sudo chown ec2-user ./tnris-ls4/testt/test2.map` change owner of new mapfile. then `chmod 664 ./tnris-ls4/testt/test2.map` to change permission (https://github.com/s3fs-fuse/s3fs-fuse/issues/333)
 **database credentials are in the mapfile! needs to be handled?**
 47. set encryption key as environment variable on ec2 instance (and eventually ami), pass it to the docker on run with `-e` flag, then have the mapfiles use it to unencrypt the secrets with a `CONFIG "MS_ENCRYPTION_KEY" ""`. see step #49, followed up on but can be ignored.
