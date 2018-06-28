@@ -43,3 +43,4 @@ ls4-04-shp_index/*
 !ls4-04-shp_index/lambda_function.py
 !ls4-04-shp_index/requirements.txt
 !ls4-04-shp_index/dep_cleanup.py
+secrets.txt

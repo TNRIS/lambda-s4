@@ -20,11 +20,13 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 3. `ls4-01-compress` runs generic DEFLATE compression on georeferenced tif and reuploads to same key but in a sub directory (environment variable defined). Then it invokes the second lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
 4. `ls4-02-overviews` creates overviews on the compressed tif and dumps them alongside it in the sub directory (.ovr). This function has a sub directory environment variable which it verifies is part of the compressed tif key in order to run -- **this means the sub directory environment variable for both functions must be the same**. This triggers the third lambda function by an event wired to monitor the bucket for all ovr extensions.
 5. `ls4-03-cog` creates the cloud optimized geotiff (COG) from tif and ovr in the sub directory. Then it invokes the fourth lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
-6. `ls4-04-shp_index` creates the shapefile tile index of all COGs in s3 for the collection. drops it off in s3. This triggers the fifth lambda function by an event wired to monitor the bucket for all shp extensions.
+6. `ls4-04-shp_index` creates the shapefile tile index of all COGs in s3 for the collection. drops it off in s3. Then it uploads the tile index into the PostGIS RDS for use by mapfiles. This triggers the fifth lambda function by an event wired to monitor the bucket for all shp extensions.
+7. `ls4-05-<mapfile?>`
 
 TODO:
--upload shapefile to PostGIS
 -create mapfile and dump into s3
+-setup fuse with ecs ami
+-mapfile upload with proper headers
 
 ---
 
@@ -35,7 +37,7 @@ TODO:
 * This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).
 * General 'atime' process to removed unused dependency files:
   1. enable atime file metadata
-  2. cd into function and install requirements
+  2. cd into function. dependencies requirements need to be installed and moved into this directory as if ready for lambda deployment (`make pack-%` from root to move dependencies)
   3. create arbitrary file to compare against (`touch start`)
   4. run function
   5. create txt list of files with atime later than arbitrary file. these are the files in the dependencies that are actually used by the function: `find <path to function> -type f -anewer ./start > dep_whitelist.txt`

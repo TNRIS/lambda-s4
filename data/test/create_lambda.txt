@@ -108,10 +108,19 @@ aws lambda create-function --region us-east-1 \
 04
 aws lambda create-function --region us-east-1 \
     --function-name ls4-04-shp_index \
-    --description 'Python function to create bounding box footprint shapefile from ../cog/' \
+    --description 'Python function to create tile index from ../cog/ into PostGIS and then upload SHP to s3' \
     --zip-file fileb://ls4-04-shp_index.zip \
     --role <aws lambda iam arn> \
     --memory-size 960 \
     --timeout 120 \
+    --environment Variables="{DB_DRIVER='', \
+          DB_NAME='', \
+          DB_USER= '', \
+          DB_PASSWORD= '', \
+          DB_HOST= '', \
+          DB_PORT= ''}" \
+    --vpc-config SubnetIds="","",SecurityGroupIds="","" \
     --handler lambda_function.lambda_handler \
     --runtime python3.6
+
+05
