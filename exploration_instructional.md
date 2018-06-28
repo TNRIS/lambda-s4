@@ -99,8 +99,19 @@ Mount s3:
 42. setup permissions using lambda-s4-mapserver iam key and secret. be sure to chown the .passwd-s3fs file in the user's $HOME directory to the ec2-user user. [specific permissions](https://github.com/s3fs-fuse/s3fs-fuse/wiki/Fuse-Over-Amazon) necessary for passwd-s3fs file
 43. sudo edit /etc/fuse.conf to uncomment out the `user_allow_other` line. this permits mounting the s3 bucket and allowing other users to access it.
 44. `s3fs tnris-ls4 -o multireq_max=5 -o allow_other ./tnris-ls4` to mount. `sudo umount ./tnris-ls4` to unmount.
+PERMISSIONS:
+stat tnris-ls4
+  File: ‘tnris-ls4’
+  Size: 0         	Blocks: 1          IO Block: 4096   directory
+Device: 20h/32d	Inode: 1           Links: 1
+Access: (0777/drwxrwxrwx)  Uid: (  500/ec2-user)   Gid: (  500/ec2-user)
+Access: 1970-01-01 00:00:00.000000000 +0000
+Modify: 1970-01-01 00:00:00.000000000 +0000
+Change: 1970-01-01 00:00:00.000000000 +0000
+ Birth: -
+
 45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory. then run steps 30-32 for logging.
-**NOTE: s3 directory 'testt' must be owned by ec2-user with 0775 access applied**
+**NOTE: s3 directory 'testt' must be owned by ec2-user with 0775 access applied. this is accomplished by 'mkdir testt'**
 46. `sudo chown ec2-user ./tnris-ls4/testt/test2.map` change owner of new mapfile. then `chmod 664 ./tnris-ls4/testt/test2.map` to change permission (https://github.com/s3fs-fuse/s3fs-fuse/issues/333)
 **database credentials are in the mapfile! needs to be handled?**
 47. set encryption key as environment variable on ec2 instance (and eventually ami), pass it to the docker on run with `-e` flag, then have the mapfiles use it to unencrypt the secrets with a `CONFIG "MS_ENCRYPTION_KEY" ""`. see step #49, followed up on but can be ignored.
