@@ -25,7 +25,6 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 8.
 
 TODO:
--create mapfile and dump into s3
 -setup fuse with ecs ami
 -mapfile upload with proper headers
 -setup windows fuse for scanned/ & georef/ uploads. configure to be done as public-read ACL
@@ -52,7 +51,12 @@ TODO:
 
 ## Deployment
 
-* `ls4-04-shp_index` python requires packing dependencies into zipfile for deployment. Do this by running `make pack-ls4-04-shp_index` from the repo folder
+* `ls4-04-shp_index` & `ls4-05-mapfile` are python functions which require copying dependencies from site-packages to function folder for deployment.
+* JS functions only have their `./bin/<gdal binary>` as a dependency and don't need others transferred.
+* if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
+* `ls4-04-shp_index` is a special case as it uses Rasterio and ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
+* then run `make pack-<function/folder name>` from project root to copy dependencies from site-packages into function folder.
+* zip contents for upload.
 
 TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure
 * any non .tif or .ovr files

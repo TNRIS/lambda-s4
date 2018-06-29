@@ -124,3 +124,20 @@ aws lambda create-function --region us-east-1 \
     --runtime python3.6
 
 05
+aws lambda create-function --region us-east-1 \
+    --function-name ls4-05-mapfile \
+    --description 'Python function to create the mapfile for a collection and dump into s3 for serving from Mapserver' \
+    --zip-file fileb://ls4-05-mapfile.zip \
+    --role <aws lambda iam arn> \
+    --memory-size 960 \
+    --timeout 120 \
+    --environment Variables="{DB_NAME='', \
+          DB_USER='', \
+          DB_PASSWORD='', \
+          DB_HOST='', \
+          DB_PORT='', \
+          MAPSERVER_ACCESS_KEY_ID='', \
+          MAPSERVER_SECRET_ACCESS_KEY=''}" \
+    --vpc-config SubnetIds="","",SecurityGroupIds="","" \
+    --handler lambda_function.lambda_handler \
+    --runtime python3.6
