@@ -44,3 +44,7 @@ ls4-04-shp_index/*
 !ls4-04-shp_index/requirements.txt
 !ls4-04-shp_index/dep_cleanup.py
 secrets.txt
+
+ls4-05-mapfile/*
+!ls4-05-mapfile/lambda_function.py
+!ls4-05-mapfile/template.map
