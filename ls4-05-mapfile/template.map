@@ -1,0 +1,62 @@
+MAP
+  NAME "<mapname>"
+  STATUS ON
+  UNITS DD
+  IMAGECOLOR 255 255 255
+  EXTENT <xmin> <ymin> <xmax> <ymax>
+  CONFIG "MS_ERRORFILE" "/var/log/ms_error.log"
+  CONFIG "AWS_ACCESS_KEY_ID" "<mapserver_access_key>"
+  CONFIG "AWS_SECRET_ACCESS_KEY" "<mapserver_secret_access_key>"
+  WEB
+    METADATA
+      "wms_title" "<wmstitle>"
+      "wms_enable_request" "*"
+      "wms_onlineresource" "http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/<tablename>.map&"
+    END
+  END
+  PROJECTION
+     "init=epsg:3857"
+  END
+
+  LAYER
+    NAME "<collection>"
+    TILEINDEX "<collection>_index"
+    TILEITEM "location"
+    TILESRS "src_srs"
+    STATUS ON
+    TYPE RASTER
+    PROJECTION
+       "init=epsg:3857"
+    END
+    METADATA
+      "wms_title" "Frame"
+    END
+  END
+
+
+  LAYER
+      NAME <collection>_index
+      CONNECTIONTYPE POSTGIS
+      CONNECTION "host=<host> port=<port> dbname=<database> user=<username> password=<password>"
+      TYPE POLYGON
+      STATUS ON
+      DATA "geom FROM <tablename>"
+      TEMPLATE WMSGetFeatureInfo
+      PROJECTION
+         "init=epsg:3857"
+      END
+      METADATA
+        "wms_title" "Frame Boundary"
+        "gml_include_items" "all"
+        "wms_include_items" "all"
+      END
+      CLASS
+        NAME       "Frame Boundary"
+        STYLE
+          OUTLINECOLOR    100 250 100
+          OUTLINEWIDTH	2.0
+        END
+      END
+      #CLOSE_CONNECTION "DEFER"
+  END
+END
