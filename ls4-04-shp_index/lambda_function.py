@@ -96,6 +96,8 @@ def lambda_handler(event, context):
     df['geom'] = df['geometry'].apply(lambda x: WKTElement(x.wkt, srid=3857))
     df.drop('geometry', 1, inplace=True)
     print('geom reformatted')
+    table_name = index_name.lower()
+    print(table_name)
     df.to_sql(table_name, engine, if_exists='replace', index=True, index_label='oid', dtype={'geom': Geometry('POLYGON', srid=3857)})
     print('tile index added to postgis!')
 
