@@ -18,10 +18,8 @@ conn_string = "dbname='%s' user='%s' host='%s' password='%s'" % (database, usern
 
 def lambda_handler(event, context):
     print(event)
-    print(context)
     # establish some variables
     print(event['Records'][0]['s3'])
-    print(event.keys())
 
     # prepare input event
     if 'sourceBucket' not in event.keys():
