@@ -21,8 +21,7 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 4. `ls4-02-overviews` creates overviews on the compressed tif and dumps them alongside it in the sub directory (.ovr). This function has a sub directory environment variable which it verifies is part of the compressed tif key in order to run -- **this means the sub directory environment variable for both functions must be the same**. This triggers the third lambda function by an event wired to monitor the bucket for all ovr extensions.
 5. `ls4-03-cog` creates the cloud optimized geotiff (COG) from tif and ovr in the sub directory. Then it invokes the fourth lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
 6. `ls4-04-shp_index` creates the shapefile tile index of all COGs in s3 for the collection. drops it off in s3. Then it uploads the tile index into the PostGIS RDS for use by mapfiles. This triggers the fifth lambda function by an event wired to monitor the bucket for all shp extensions.
-7. `ls4-05-mapfile` create the mapfile and uploads it to the s3 directory '/mapfiles' with the appropriate ec2 file ownership headers. s3 directory 'mapfiles' must be owned by the same user. this is accomplished by using fuse s3fs to mount the volume and using said user to `mkdir mapfiles` within the bucket. Mapfile 'MAP' 'NAME' cannot be same as layer name or both draw
-8.
+7. `ls4-05-mapfile` creates the mapfile and uploads it to the s3 directory '/mapfiles' with the appropriate ec2 file ownership headers.
 
 TODO:
 -setup fuse with ecs ami
@@ -57,6 +56,12 @@ TODO:
 * `ls4-04-shp_index` is a special case as it uses Rasterio and ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
 * then run `make pack-<function/folder name>` from project root to copy dependencies from site-packages into function folder.
 * zip contents for upload.
+
+---
+
+## Notes
+* s3 directory 'mapfiles' must be owned by the same user ('ec2-user') running on the ec2. this is accomplished by using fuse s3fs to mount the volume and using said user to `mkdir mapfiles` within the bucket. This only has to be done upon initial deployment of the whole project (a.k.a. shouldn't have to ever happen again); just noting in case tragedy requires entire infrastructure to be redone.
+* Note about Mapfiles: Mapfile 'MAP' 'NAME' cannot be same as layer name or both draw in qgis/esri simultaneously
 
 TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure
 * any non .tif or .ovr files
