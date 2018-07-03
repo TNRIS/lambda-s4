@@ -113,6 +113,17 @@ Change: 1970-01-01 00:00:00.000000000 +0000
 45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory. then run steps 30-32 for logging.
 **NOTE: s3 directory 'testt' must be owned by ec2-user with 0775 access applied. this is accomplished by 'mkdir testt'. cannot create this folder from within the aws console as it will be owned by root.**
 **mapfile MAP - NAME cannot be same as layer name (capitalization is ignored) or all layers draw all the time**
+**Setup auto remount on bootup**
+<code>sudo vi /etc/rc.local</code> to open the rc file. We will be adding an entry for automatically mounting the directory on boot.
+</li>
+<li>
+With the file open for editing in vi, hit the <code>i</code> key to start 'insert' mode.
+<br/>
+Then arrow down and add a line for running the s3fs mounting command with hard paths to the binary and directory to mount. The command should be run by user ec2-user. You identified the binary path earlier with the command <code>which s3fs</code>.
+<br/>
+The added line should look like this:<code style="white-space: pre-wrap;">sudo runuser -l ec2-user -c '/usr/bin/s3fs mapserver-bucket -o multireq_max=5 -o allow_other /home/ec2-user/bucket'</code>
+<br/>
+Then save and close the file by clicking the <code>ESC</code> key, then typing <code>:wq!</code>, and finally hitting <code>Enter</code>.
 *  http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/countydelete_agencydelete_yyyy_frames.map&SERVICE=WMS&VERSION=1.1.1 &REQUEST=GetCapabilities
 *  http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/countydelete_agencydelete_yyyy_frames.map
 * sudo docker run --detach -v /home/ec2-user/tnris-ls4/mapfiles:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver
