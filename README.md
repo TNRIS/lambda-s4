@@ -23,9 +23,15 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 6. `ls4-04-shp_index` creates the shapefile tile index of all COGs in s3 for the collection. drops it off in s3. Then it uploads the tile index into the PostGIS RDS for use by mapfiles. This triggers the fifth lambda function by an event wired to monitor the bucket for all shp extensions.
 7. `ls4-05-mapfile` creates the mapfile and uploads it to the s3 directory '/mapfiles' with the appropriate ec2 file ownership headers.
 
+---
+
+## MapServer
+
+The Workflow of lambda functions maintain the imagery and mapfiles for all the services. The mapfiles are dumped into the s3 bucket in a subdirectory named 'mapfiles' (see note below about this folder's permissions). Independent of this workflow, is a dockerized Mapserver instance running within ECS in it's own cluser. It is within it's own cluster because it must be run on a custom AMI which has FUSE s3fs installed and the s3 bucket mounted as directory. This directory is shared as a volume to the running docker so the Mapserver looks in the bucket for mapfiles to serve under the illusion they are local. Instructions for creating the AMI are [here](http://adambreznicky.com/fuse_mapserver/) with included details related to permissions requirements.
+
+
 TODO:
--setup fuse with ecs ami
--mapfile upload with proper headers
+-list mapfiles (services) RDC page
 -setup windows fuse for scanned/ & georef/ uploads. configure to be done as public-read ACL
 
 ---
