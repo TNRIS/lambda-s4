@@ -79,9 +79,14 @@ def lambda_handler(event, context):
             dl_index = 'https://s3.amazonaws.com/' + source_bucket + '/' + shp_key + '_idx.zip'
 
             frame_name = key.split('/')[-1].replace('.tif','')
-            date = frame_name.split('_')[0]
-            roll = frame_name.split('_')[1].split('-')[0]
-            frame_num = frame_name.split('_')[1].split('-')[1]
+            if frame_name != 'mosaic':
+                date = frame_name.split('_')[0]
+                roll = frame_name.split('_')[1].split('-')[0]
+                frame_num = frame_name.split('_')[1].split('-')[1]
+            else:
+                date = 'MULTIPLE'
+                roll = 'MULTIPLE'
+                frame_num = 'MULTIPLE'
 
             bounds = dataset.bounds
             df = df.append({'location':location, 'src_srs': src_srs, 'date': date, 'roll': roll, 'frame_num': frame_num, 'dl_orig': dl_orig, 'dl_georef': dl_georef, 'dl_index': dl_index, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)
