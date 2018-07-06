@@ -11,7 +11,7 @@ MAP
     METADATA
       "wms_title" "<wmstitle>"
       "wms_enable_request" "*"
-      "wms_onlineresource" "http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/<tablename>.map&"
+      "wms_onlineresource" "http://mapserver.tnris.org/wms/?map=/mapfiles/<tablename>.map&"
     END
   END
   PROJECTION
