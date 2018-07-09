@@ -13,6 +13,14 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 
 ---
 
+## Setup
+
+* Install [qGIS](https://qgis.org/en/site/forusers/download.html) for local testing (not used in functions themselves): `sudo dnf update`, `sudo dnf install qgis qgis-python qgis-grass qgis-server`
+* Install [GDAL 2.3.0](http://trac.osgeo.org/gdal/wiki/DownloadSource): download the .tar.gz, extract and cd into the folder, ./configure, sudo make, sudo make install (fedora required a separate install of [jasper](http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz) first) - or - ubuntu instruction [here](http://www.sarasafavi.com/installing-gdalogr-on-ubuntu.html)
+* Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/installing.html) and configure with proper key & secret
+
+---
+
 ## The Workflow
 
 1. RDC uploads scanned image to  appropriate `.../scanned/...` directory in the tree for storage. No other event happens (this is just for availability to download at other times). Make public with 'public-read' ACL.
@@ -27,7 +35,7 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 
 ## MapServer
 
-The Workflow of lambda functions maintain the imagery and mapfiles for all the services. The mapfiles are dumped into the s3 bucket in a subdirectory named 'mapfiles' (see note below about this folder's permissions). Independent of this workflow, is a dockerized Mapserver instance running within ECS in it's own cluser. It is within it's own cluster because it must be run on a custom AMI which has FUSE s3fs installed and the s3 bucket mounted as directory. This directory is shared as a volume to the running docker so the Mapserver looks in the bucket for mapfiles to serve under the illusion they are local. Instructions for creating the AMI are [here](http://adambreznicky.com/fuse_mapserver/) with included details related to permissions requirements.
+The Workflow of lambda functions maintain the imagery and mapfiles for all the services. The mapfiles are dumped into the s3 bucket in a subdirectory named 'mapfiles' (see note below about this folder's permissions). Independent of this workflow, is a dockerized Mapserver instance running within ECS in it's own cluser. It is within it's own cluster because it must be run on a custom AMI which has FUSE s3fs installed and the s3 bucket mounted as directory. This directory is shared as a volume to the running docker so the Mapserver looks in the bucket for mapfiles to serve under the illusion they are local. Instructions for creating the AMI are [here](http://adambreznicky.com/fuse_mapserver/) with included details related to permissions requirements. No special code is needed for the Mapserver instance (out-of-the-box configuration) so head over the TNRIS deployments repo for managing the instance with Terraform.
 
 
 TODO:
@@ -61,7 +69,7 @@ TODO:
 * if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
 * `ls4-04-shp_index` is a special case as it uses Rasterio and ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
 * then run `make pack-<function/folder name>` from project root to copy dependencies from site-packages into function folder.
-* zip contents for upload.
+* zip contents and upload if testing. otherwise, head over to TNRIS deployments for the Terraform deployment of the functions and Mapserver instance.
 
 ---
 
@@ -69,7 +77,7 @@ TODO:
 * s3 directory 'mapfiles' must be owned by the same user ('ec2-user') running on the ec2. this is accomplished by using fuse s3fs to mount the volume and using said user to `mkdir mapfiles` within the bucket. This only has to be done upon initial deployment of the whole project (a.k.a. shouldn't have to ever happen again); just noting in case tragedy requires entire infrastructure to be redone.
 * Note about Mapfiles: Mapfile 'MAP' 'NAME' cannot be same as layer name or both draw in qgis/esri simultaneously
 
-TODO: Bucket cleanup routine to delete anything that doesn't match t he rigid structure
+TODO: Bucket cleanup routine to delete anything that doesn't match the rigid structure
 * any non .tif or .ovr files
 * folder structure
 * file name structure
