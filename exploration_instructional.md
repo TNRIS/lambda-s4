@@ -81,7 +81,8 @@ Lambda S3 Services - Hosted raster tile services from AWS s3
 30. `sudo docker exec mapserver touch /var/log/ms_error.log`
 31. `sudo docker exec mapserver chown www-data /var/log/ms_error.log`
 32. `sudo docker exec mapserver chmod 644 /var/log/ms_error.log`. then use `sudo docker exec mapserver cat /var/log/ms_error.log` to view logs.
-
+touch /var/log/ms_error.log && chown www-data /var/log/ms_error.log && chmod 644 /var/log/ms_error.log
+`sudo docker exec mapserver sh -c 'touch /var/log/ms_error.log && chown www-data /var/log/ms_error.log && chmod 644 /var/log/ms_error.log'`
 Working issues:
 
 33. Instructional url (didnt use it)  http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/test.map&SERVICE=WMS&LAYERS=test_frames&SRS=epsg:4326&BBOX=-95.7362749,32.2025543,-95.6835030,32.1582697&STYLES=&VERSION=1.1.1&REQUEST=GetMap&WIDTH=256&HEIGHT=256%EF%BB%BF
@@ -113,6 +114,9 @@ Change: 1970-01-01 00:00:00.000000000 +0000
 45. `sudo docker run --detach -v /home/ec2-user/tnris-ls4/testt:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver` to run mapserver with s3 as the mapfiles directory. then run steps 30-32 for logging.
 **NOTE: s3 directory 'testt' must be owned by ec2-user with 0775 access applied. this is accomplished by 'mkdir testt'. cannot create this folder from within the aws console as it will be owned by root.**
 **mapfile MAP - NAME cannot be same as layer name (capitalization is ignored) or all layers draw all the time**
+
+
+
 **Setup auto remount on bootup**
 <code>sudo vi /etc/rc.local</code> to open the rc file. We will be adding an entry for automatically mounting the directory on boot.
 </li>
@@ -124,11 +128,13 @@ Then arrow down and add a line for running the s3fs mounting command with hard p
 The added line should look like this:<code style="white-space: pre-wrap;">sudo runuser -l ec2-user -c '/usr/bin/s3fs mapserver-bucket -o multireq_max=5 -o allow_other /home/ec2-user/bucket'</code>
 <br/>
 Then save and close the file by clicking the <code>ESC</code> key, then typing <code>:wq!</code>, and finally hitting <code>Enter</code>.
+
+
+
 *  http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/countydelete_agencydelete_yyyy_frames.map&SERVICE=WMS&VERSION=1.1.1 &REQUEST=GetCapabilities
 *  http://ec2-34-201-112-166.compute-1.amazonaws.com:8080/wms/?map=/mapfiles/countydelete_agencydelete_yyyy_frames.map
 * sudo docker run --detach -v /home/ec2-user/tnris-ls4/mapfiles:/mapfiles:ro --publish 8080:80 --name mapserver geodata/mapserver
 46. `sudo chown ec2-user ./tnris-ls4/testt/test2.map` change owner of new mapfile. then `chmod 664 ./tnris-ls4/testt/test2.map` to change permission (https://github.com/s3fs-fuse/s3fs-fuse/issues/333)
-**database credentials are in the mapfile! needs to be handled?**
 47. set encryption key as environment variable on ec2 instance (and eventually ami), pass it to the docker on run with `-e` flag, then have the mapfiles use it to unencrypt the secrets with a `CONFIG "MS_ENCRYPTION_KEY" ""`. see step #49, followed up on but can be ignored.
 48. To resolve #46 - python programmatically uploaded mapfiles need to be uploaded to s3 with custom http headers identifying 'ec2-user's uid, gid, and the required mtime & mode.
 ``` python
@@ -137,9 +143,6 @@ s3 = boto3.resource('s3')
 s3.Bucket('tnris-ls4').upload_file('/<path to file>/test.map','testt/test2.map',ExtraArgs={'Metadata':{'mode':'33204','uid':'500','gid':'500','mtime':'1528814551'}})
 ```
 49. [created encryption key on mapserver docker](http://mapserver.github.io/nl_NL/utilities/msencrypt.html) but this probably won't be necessary as all mapfiles will be on lockdown in s3. ignore this step.
-
-Creating new mapfiles programmatically:
-`sed -i 's/oldstring/newstring/g' filename` to replace string pieces in file
 
 
 ---

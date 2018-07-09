@@ -11,6 +11,13 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 * Separate processing functions must be run for 1 band (grayscale) vs 3 band (natural color) rasters. The processing functions don't manipulate projection or NoData properties rasters. Therefore, upload prefixes (location) and appropriate formatting is required for the processing pipeline to run.
 * Discovery of process and testing information outlined within `exploration_instructional.md` with all associated files within the './data' folder of this repo
 
+Process output will be a WMS Service for each collection. The link will be: `http://mapserver.tnris.org/wms/?map=/mapfiles/<collection mapfile name>.map`
+
+Collection Mapfile Naming Convention (all lowercase with natural spaces supplemented with underscores):
+`<county name>_<agency name>_<yyyy>_<type>.map` or `<multi-county agency>_<mission code>_<type>.map` where type is 'frames', 'index', or 'mosaic'
+
+Mapfile naming standard details outlined in the 'RDC Steps' link above.
+
 ---
 
 ## Setup
@@ -18,6 +25,7 @@ Project is an aerial image processing pipeline which utilizes a series of event 
 * Install [qGIS](https://qgis.org/en/site/forusers/download.html) for local testing (not used in functions themselves): `sudo dnf update`, `sudo dnf install qgis qgis-python qgis-grass qgis-server`
 * Install [GDAL 2.3.0](http://trac.osgeo.org/gdal/wiki/DownloadSource): download the .tar.gz, extract and cd into the folder, ./configure, sudo make, sudo make install (fedora required a separate install of [jasper](http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz) first) - or - ubuntu instruction [here](http://www.sarasafavi.com/installing-gdalogr-on-ubuntu.html)
 * Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/installing.html) and configure with proper key & secret
+* Built with Python 3.6
 
 ---
 
@@ -75,10 +83,12 @@ TODO:
 
 ## Notes
 * s3 directory 'mapfiles' must be owned by the same user ('ec2-user') running on the ec2. this is accomplished by using fuse s3fs to mount the volume and using said user to `mkdir mapfiles` within the bucket. This only has to be done upon initial deployment of the whole project (a.k.a. shouldn't have to ever happen again); just noting in case tragedy requires entire infrastructure to be redone.
-* Note about Mapfiles: Mapfile 'MAP' 'NAME' cannot be same as layer name or both draw in qgis/esri simultaneously
+* 'MAP' & 'NAME' within mapfiles cannot be same as layer name or both draw in qgis/esri simultaneously
+* Mapfiles require an AWS user key id and secret key to permit Mapserver access to the bucket. The user needs a policy with GET and PUT permissions to the bucket. These are utilized by `ls4-05-mapfile` function and pulled as environment variables
 * [Project Narrative](http://adambreznicky.com/cog_machine/)
 
 TODO: Bucket cleanup routine to delete anything that doesn't match the rigid structure
 * any non .tif or .ovr files
 * folder structure
 * file name structure
+TODO: WMTS
