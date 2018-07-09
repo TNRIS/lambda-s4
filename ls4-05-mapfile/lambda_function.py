@@ -11,6 +11,7 @@ host = os.environ.get('DB_HOST')
 port = os.environ.get('DB_PORT')
 mapserver_access_key = os.environ.get('MAPSERVER_ACCESS_KEY_ID')
 mapserver_secret_access_key = os.environ.get('MAPSERVER_SECRET_ACCESS_KEY')
+dns_url = os.environ.get('DNS_URL')
 
 conn_string = "dbname='%s' user='%s' host='%s' password='%s'" % (database, username, host, password)
 
@@ -84,6 +85,7 @@ def lambda_handler(event, context):
         t = t.replace('<port>', port)
         t = t.replace('<mapserver_access_key>', mapserver_access_key)
         t = t.replace('<mapserver_secret_access_key>', mapserver_secret_access_key)
+        t = t.replace('<dns_url>', dns_url)
         t = t.replace('<collection>', collection)
         t = t.replace('<mapname>', mapname)
         t = t.replace('<wmstitle>', wmstitle)
