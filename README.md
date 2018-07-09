@@ -85,7 +85,7 @@ TODO:
 * s3 directory 'mapfiles' must be owned by the same user ('ec2-user') running on the ec2. this is accomplished by using fuse s3fs to mount the volume and using said user to `mkdir mapfiles` within the bucket. This only has to be done upon initial deployment of the whole project (a.k.a. shouldn't have to ever happen again); just noting in case tragedy requires entire infrastructure to be redone.
 * 'MAP' & 'NAME' within mapfiles cannot be same as layer name or both draw in qgis/esri simultaneously
 * Mapfiles require an AWS user key id and secret key to permit Mapserver access to the bucket. The user needs a policy with GET and PUT permissions to the bucket. These are utilized by `ls4-05-mapfile` function and pulled as environment variables
-* [Project Narrative](http://adambreznicky.com/cog_machine/)
+* [Project Narrative](http://adambreznicky.com/cog_machine/) with overview of lambda functions and instructions for setting up Mapserver
 
 TODO: Bucket cleanup routine to delete anything that doesn't match the rigid structure
 * any non .tif or .ovr files
