@@ -3,6 +3,9 @@
 const child_process = require('child_process');
 const aws = require('aws-sdk');
 const s3 = new aws.S3();
+const lambda = new aws.Lambda({
+  region: 'us-east-1' //change to your region
+});
 const exec = require('child_process').execSync;
 const fs = require('fs');
 
