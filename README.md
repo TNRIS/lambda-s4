@@ -45,11 +45,6 @@ Mapfile naming standard details outlined in the 'RDC Steps' link above.
 
 The Workflow of lambda functions maintain the imagery and mapfiles for all the services. The mapfiles are dumped into the s3 bucket in a subdirectory named 'mapfiles' (see note below about this folder's permissions). Independent of this workflow, is a dockerized Mapserver instance running within ECS in it's own cluser. It is within it's own cluster because it must be run on a custom AMI which has FUSE s3fs installed and the s3 bucket mounted as directory. This directory is shared as a volume to the running docker so the Mapserver looks in the bucket for mapfiles to serve under the illusion they are local. Instructions for creating the AMI are [here](http://adambreznicky.com/fuse_mapserver/) with included details related to permissions requirements. No special code is needed for the Mapserver instance (out-of-the-box configuration) so head over the TNRIS deployments repo for managing the instance with Terraform.
 
-
-TODO:
--list mapfiles (services) RDC page
--setup windows fuse for scanned/ & georef/ uploads. configure to be done as public-read ACL
-
 ---
 
 ## Rasterio needs ManyLinux Wheels
@@ -92,9 +87,3 @@ View the list of all services/mapfiles created and hosted by this project: `http
 * 'MAP' & 'NAME' within mapfiles cannot be same as layer name or both draw in qgis/esri simultaneously
 * Mapfiles require an AWS user key id and secret key to permit Mapserver access to the bucket. The user needs a policy with GET and PUT permissions to the bucket. These are utilized by `ls4-05-mapfile` function and pulled as environment variables
 * [Project Narrative](http://adambreznicky.com/cog_machine/) with overview of lambda functions and instructions for setting up Mapserver
-
-TODO: Bucket cleanup routine to delete anything that doesn't match the rigid structure
-* any non .tif or .ovr files
-* folder structure
-* file name structure
-TODO: WMTS
