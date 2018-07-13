@@ -81,6 +81,12 @@ TODO:
 
 ---
 
+## Output/Resulting Services
+
+View the list of all services/mapfiles created and hosted by this project: `https://tnris.org/mapserver/`
+
+---
+
 ## Notes
 * s3 directory 'mapfiles' must be owned by the same user ('ec2-user') running on the ec2. this is accomplished by using fuse s3fs to mount the volume and using said user to `mkdir mapfiles` within the bucket. This only has to be done upon initial deployment of the whole project (a.k.a. shouldn't have to ever happen again); just noting in case tragedy requires entire infrastructure to be redone.
 * 'MAP' & 'NAME' within mapfiles cannot be same as layer name or both draw in qgis/esri simultaneously
