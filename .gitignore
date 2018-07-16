@@ -49,3 +49,7 @@ ls4-05-mapfile/*
 !ls4-05-mapfile/lambda_function.py
 !ls4-05-mapfile/requirements.txt
 !ls4-05-mapfile/template.map
+
+ls4-maintenance/*
+!ls4-maintenance/lambda_function.py
+!ls4-maintenance/requirements.txt
