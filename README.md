@@ -47,6 +47,12 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 
 ---
 
+## Maintenance
+
+`ls4-maintenance` is a Cloudwatch scheduled lambda function which runs every 24 hours and performs simple validation checks accross the project infrastructure. If invalid situations are identified, the function handles any deletions as necessary and then notifys a project SNS topic for developer awareness and potential follow up.
+
+---
+
 ## Rasterio needs ManyLinux Wheels
 
 * `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`
