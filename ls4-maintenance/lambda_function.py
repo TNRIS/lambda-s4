@@ -10,7 +10,7 @@ password = os.environ.get('DB_PASSWORD')
 host = os.environ.get('DB_HOST')
 port = os.environ.get('DB_PORT')
 bucket_name = os.environ.get('BUCKET')
-aws_account = os.environ.get('AWS_ACCOUNT')
+aws_account = os.environ.get('AWS_ACCOUNT_ID')
 sns_error_topic = os.environ.get('SNS_ERROR_TOPIC')
 
 conn_string = "dbname='%s' user='%s' host='%s' password='%s'" % (database, username, host, password)
@@ -33,6 +33,7 @@ def compare_mapfiles(client, tables, cur, token=''):
         )
     # cleanup response to be list of keys
     keys = [x['Key'] for x in response['Contents'] if x['Key'] != 'mapfiles/']
+    print("Mapfile Keys in s3:")
     print(keys)
 
     for k in keys:
@@ -63,7 +64,7 @@ def compare_mapfiles(client, tables, cur, token=''):
 def excess_tables(conn, cur):
     # global_table_list is now a list of tables without mapfiles
     # lets notify they are excess and delete
-    print('excess')
+    print('excess tables in RDS:')
     print(global_table_list)
     for t in global_table_list:
         print(t + " is an RDS table but doesn't have a mapfile. Deleting.")
@@ -102,12 +103,16 @@ def lambda_handler(event, context):
         tables = [x[0] for x in cur.fetchall() if x[0] not in default_tables]
         global global_table_list
         global_table_list = tables
+        print("RDS tables:")
         print(tables)
 
         # compare table list to mapfiles in bucket
         compare_mapfiles(client, tables, cur)
         # now we can do the inverse table name comparison
-        excess_tables(conn, cur)
+        if len(global_table_list) > 0:
+            excess_tables(conn, cur)
+        else:
+            print('No excess RDS tables found which did not have a mapfile.')
 
     except Exception as e:
         print("there was an error.")
