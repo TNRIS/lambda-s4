@@ -52,7 +52,7 @@ def lambda_handler(event, context):
         for cog in response['Contents']:
             prefix = 's3://' + source_bucket + '/'
             s3_path = prefix + cog['Key']
-            if 'tile_index' not in s3_path:
+            if 'tile_index' not in s3_path and s3_path[-4:] != 'cog/':
                 cog_keys.append(s3_path)
         if 'NextContinuationToken' in response.keys():
             get_keys(response['NextContinuationToken'])
