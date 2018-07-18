@@ -30,6 +30,22 @@ exports.handler = (event, context, callback) => {
         var sourceKey =  event.sourceKey;
     }
 
+    // update ACL for uploaded /scanned tif
+    // /scanned tif only exists for frames and indexes - NOT mosaics
+    if (sourceKey.includes('/frames/scanned/') || sourceKey.includes('/index/scanned/')) {
+          console.log('updating scanned/ tif ACL to public-read');
+          console.log(sourceKey);
+          var scannedParams = {
+            Bucket: sourceBucket,
+            Key: sourceKey,
+            ACL: 'public-read'
+          };
+          s3.putObjectAcl(scannedParams, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else     console.log('scanned tif ACL update success!'); // successful response
+          });
+    }
+
     // escape if s3 event triggered by scanned upload or cog output
     if (!sourceKey.includes('/georef/')) {
       console.log("error: key doesn't include '/georef/'. exiting...");
