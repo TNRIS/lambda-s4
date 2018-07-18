@@ -33,6 +33,7 @@ def lambda_handler(event, context):
         client = boto3.client('s3')
         response = client.put_object_acl(ACL='public_read',Bucket=source_bucket,Key=source_key)
         print(response)
+        return
 
     # verify input is a georef upload
     if 'georef/' not in source_key:
