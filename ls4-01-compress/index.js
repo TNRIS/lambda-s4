@@ -14,21 +14,8 @@ function systemSync(cmd) {
 };
 
 exports.handler = (event, context, callback) => {
-    console.log(event.Records[0].s3);
-    // If not invoked directly then treat as coming from S3
-    if (!event.sourceBucket) {
-        if (event.Records[0].s3.bucket.name) {
-    	   var sourceBucket = event.Records[0].s3.bucket.name;
-    	   var sourceKey = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, ' '));
-    	}
-        else {
-           console.error ('no source bucket defined');
-        }
-    }
-    else {
-        var sourceBucket = event.sourceBucket;
-        var sourceKey =  event.sourceKey;
-    }
+      var sourceBucket = event.sourceBucket;
+      var sourceKey =  event.sourceKey;
 
     // escape if s3 event triggered by scanned upload or cog output
     if (!sourceKey.includes('/georef/')) {
