@@ -33,6 +33,7 @@ Mapfile naming standard details outlined in the 'RDC Steps' link above.
 
 1. RDC uploads scanned image to  appropriate `.../scanned/...` directory in the tree for storage. No other event happens (this is just for availability to download at other times). Make public with 'public-read' ACL.
 2. RDC uploads georeferenced image to appropriate `.../georef/...` directory in the tree. Make public with 'public-read' ACL. This triggers the first lambda function by an event wired to monitor the bucket for all tif extensions.
+3. `ls4-00-reproject` checks if the uploaded georeferenced tif is in the proper 3857 projection. if not, it reprojects and reuploads to s3 using the same key.
 3. `ls4-01-compress` runs generic DEFLATE compression on georeferenced tif and reuploads to same key but in a sub directory (environment variable defined). Then it invokes the second lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
 4. `ls4-02-overviews` creates overviews on the compressed tif and dumps them alongside it in the sub directory (.ovr). This function has a sub directory environment variable which it verifies is part of the compressed tif key in order to run -- **this means the sub directory environment variable for both functions must be the same**. This triggers the third lambda function by an event wired to monitor the bucket for all ovr extensions.
 5. `ls4-03-cog` creates the cloud optimized geotiff (COG) from tif and ovr in the sub directory. Then it invokes the fourth lambda directly (doesn't use event because you cannot duplicate trigger on mulitple lambdas).
@@ -73,7 +74,7 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 
 ## Deployment
 
-* `ls4-04-shp_index` & `ls4-05-mapfile` are python functions which require copying dependencies from site-packages to function folder for deployment.
+* `ls4-00-reproject`, `ls4-04-shp_index`, & `ls4-05-mapfile` are python functions which require copying dependencies from site-packages to function folder for deployment.
 * JS functions only have their `./bin/<gdal binary>` as a dependency and don't need others transferred.
 * if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
 * `ls4-04-shp_index` is a special case as it uses Rasterio and ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
