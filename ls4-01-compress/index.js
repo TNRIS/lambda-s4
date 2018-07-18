@@ -30,30 +30,14 @@ exports.handler = (event, context, callback) => {
         var sourceKey =  event.sourceKey;
     }
 
-    // update ACL for uploaded /scanned tif
-    // /scanned tif only exists for frames and indexes - NOT mosaics
-    if (sourceKey.includes('/frames/scanned/') || sourceKey.includes('/index/scanned/')) {
-          console.log('updating scanned/ tif ACL to public-read');
-          console.log(sourceKey);
-          var scannedParams = {
-            Bucket: sourceBucket,
-            Key: sourceKey,
-            ACL: 'public-read'
-          };
-          s3.putObjectAcl(scannedParams, function(err, data) {
-            if (err) console.log(err, err.stack); // an error occurred
-            else     console.log('scanned tif ACL update success!'); // successful response
-          });
-    }
-
     // escape if s3 event triggered by scanned upload or cog output
     if (!sourceKey.includes('/georef/')) {
       console.log("error: key doesn't include '/georef/'. exiting...");
       console.log(sourceKey);
       return
     }
-    else if (sourceKey.includes(process.env.georefSubDir)) {
-      console.log("error: key includes the 'georefSubDir' env variable. exiting...");
+    else if (!sourceKey.includes(process.env.epsgSubDir)) {
+      console.log("error: key doesn't include the 'epsgSubDir' env variable. exiting...");
       console.log(sourceKey);
       return
     }
@@ -68,6 +52,8 @@ exports.handler = (event, context, callback) => {
       console.log('Upload Bucket: ' + process.env.uploadBucket);
       console.log('Upload Key ACL: ' + process.env.uploadKeyAcl);
       console.log('Upload Georef Sub Directory: ' + process.env.georefSubDir);
+
+      console.log('EPSG Georef Sub Directory: ' + process.env.epsgSubDir);
 
       // adjust gdal command for number of bands in raster. if not bw or nc, just escape
       var bandCmd;
@@ -98,7 +84,8 @@ exports.handler = (event, context, callback) => {
       var srcKeyParts = sourceKey.split("/");
       var filename = srcKeyParts[srcKeyParts.length-1];
       var fileWithSubDir = process.env.georefSubDir + filename;
-      var uploadKey = sourceKey.replace(filename, fileWithSubDir);
+      var fileWithEpsg = process.env.epsgSubDir + filename;
+      var uploadKey = sourceKey.replace(fileWithEpsg, fileWithSubDir);
       console.log('uploadKey: ' + uploadKey);
 
       var body = fs.createReadStream('/tmp/output.tif');
