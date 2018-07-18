@@ -70,6 +70,7 @@ def lambda_handler(event, context):
     # setup container for shapefile data
     df = gpd.GeoDataFrame(columns=['location','src_srs','date','roll','frame_num','dl_orig','dl_georef','dl_index','geometry'])
     src_srs = "EPSG:3857"
+    no_roll_agencies = ['AMS', 'USGS']
     # file shapefile data container
     for key in cog_keys:
         with rasterio.open(key) as dataset:
@@ -78,12 +79,31 @@ def lambda_handler(event, context):
             dl_georef = key.replace('s3://', 'https://s3.amazonaws.com/')
             dl_index = 'https://s3.amazonaws.com/' + source_bucket + '/' + shp_key + '_idx.zip'
 
-            frame_name = key.split('/')[-1].replace('.tif','')
-            if frame_name != 'mosaic':
-                date = frame_name.split('_')[0]
-                roll = frame_name.split('_')[1].split('-')[0]
-                frame_num = frame_name.split('_')[1].split('-')[1]
+            fly = key.split('/')[2]
+            if "_" in fly:
+                agency = fly.split("_")[0]
             else:
+                agency = ''
+
+            frame_name = key.split('/')[-1].replace('.tif','')
+            if frame_name != 'mosaic' and '/mosaic/' not in key and '/index/' not in key:
+                date = frame_name.split('_')[0]
+                if "-" in frame_name.split('_')[1]:
+                    roll = frame_name.split('_')[1].split('-')[0]
+                    frame_num = frame_name.split('_')[1].split('-')[1]
+                else:
+                    if agency in no_roll_agencies:
+                        roll = "N/A"
+                        frame_num = frame_name.split('_')[1]
+                    else:
+                        print(no_roll_agencies)
+                        print(key)
+                        raise ValueError('no roll in filename and agency not in no_roll_agencies')
+            elif frame_name != 'mosaic' and '/mosaic/' not in key and '/index/' in key:
+                roll = frame_name.split('_')[0]
+                date = frame_name.split('_')[1]
+                frame_num = frame_name.split('_')[2]
+            elif frame_name == 'mosaic' and '/mosaic/' in key and '/index/' not in key:
                 date = 'MULTIPLE'
                 roll = 'MULTIPLE'
                 frame_num = 'MULTIPLE'
