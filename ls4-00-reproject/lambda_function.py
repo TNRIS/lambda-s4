@@ -57,8 +57,14 @@ def lambda_handler(event, context):
         epsg_folder = 'georef/' + epsg_sub_dir
         upload_key = source_key.replace('georef/', epsg_folder)
         with rasterio.open(s3_path) as src:
-            print(src.crs['init'])
-            if src.crs['init'] != 'epsg:3857':
+            print(src.crs)
+            # print(src.crs['init'])
+            try:
+                crs_init = src.crs['init']
+            except:
+                crs_init = ''
+
+            if crs_init != 'epsg:3857':
                 print("let's reproject...")
                 transform, width, height = calculate_default_transform(
                     src.crs, dst_crs, src.width, src.height, *src.bounds)
