@@ -50,7 +50,7 @@ def lambda_handler(event, context):
                                               Prefix=key_path,
                                               ContinuationToken=token)
         for cog in response['Contents']:
-            prefix = 's3://' + source_bucket + '/'
+            prefix = '/vsis3/' + source_bucket + '/'
             s3_path = prefix + cog['Key']
             if 'tile_index' not in s3_path and s3_path[-4:] != 'cog/':
                 cog_keys.append(s3_path)
@@ -80,9 +80,9 @@ def lambda_handler(event, context):
             else:
                 agency = ''
 
-            location = key.replace('s3://', '/vsis3/')
-            dl_orig = key.replace('s3://', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
-            dl_georef = key.replace('s3://', 'https://s3.amazonaws.com/')
+            location = key
+            dl_orig = key.replace('/vsis3/', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
+            dl_georef = key.replace('/vsis3/', 'https://s3.amazonaws.com/')
             dl_index = 'https://s3.amazonaws.com/' + source_bucket + '/' + shp_key + '_idx.zip'
 
             frame_name = key.split('/')[-1].replace('.tif','')
