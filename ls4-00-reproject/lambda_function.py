@@ -55,7 +55,7 @@ def lambda_handler(event, context):
         prefix = 's3://' + source_bucket + '/'
         s3_path = prefix + source_key
         epsg_folder = 'georef/' + epsg_sub_dir
-        upload_key = source_key.replace('georef/', epsg_folder)
+        upload_key = source_key.replace('georef/', epsg_folder).replace('TIF', 'tif')
         with rasterio.open(s3_path) as src:
             print(src.crs)
             # print(src.crs['init'])
