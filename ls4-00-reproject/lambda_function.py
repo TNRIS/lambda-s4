@@ -62,6 +62,7 @@ def lambda_handler(event, context):
             try:
                 crs_init = src.crs['init']
             except:
+                print("no crs init. uh oh... this raster is probably georeferenced but wasn't exported to GeoTiff")
                 crs_init = ''
 
             if crs_init != 'epsg:3857':
