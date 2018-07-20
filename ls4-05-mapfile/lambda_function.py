@@ -62,10 +62,10 @@ def lambda_handler(event, context):
     coords_string = box_string[(box_string.find('(') + 1):box_string.find(')')]
     mins = coords_string.split(",")[0]
     maxs = coords_string.split(",")[1]
-    xmin = str(int(float(mins.split(" ")[0])) - 50)
-    ymin = str(int(float(mins.split(" ")[1])) - 50)
-    xmax = str(int(float(maxs.split(" ")[0])) + 50)
-    ymax = str(int(float(maxs.split(" ")[1])) + 50)
+    xmin = str(int(float(mins.split(" ")[0])) - 100)
+    ymin = str(int(float(mins.split(" ")[1])) - 100)
+    xmax = str(int(float(maxs.split(" ")[0])) + 100)
+    ymax = str(int(float(maxs.split(" ")[1])) + 100)
     print("extent coordinates found!")
     print(xmin, ymin, xmax, ymax)
 
