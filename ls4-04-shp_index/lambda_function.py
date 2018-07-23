@@ -50,7 +50,7 @@ def lambda_handler(event, context):
                                               Prefix=key_path,
                                               ContinuationToken=token)
         for cog in response['Contents']:
-            prefix = '/vsis3/' + source_bucket + '/'
+            prefix = 's3://' + source_bucket + '/'
             s3_path = prefix + cog['Key']
             if 'tile_index' not in s3_path and s3_path[-4:] != 'cog/':
                 cog_keys.append(s3_path)
@@ -81,12 +81,12 @@ def lambda_handler(event, context):
                 agency = ''
 
             location = key
-            dl_orig = key.replace('/vsis3/', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
-            dl_georef = key.replace('/vsis3/', 'https://s3.amazonaws.com/')
+            dl_orig = key.replace('s3://', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
+            dl_georef = key.replace('s3://', 'https://s3.amazonaws.com/')
             dl_index = 'https://s3.amazonaws.com/' + source_bucket + '/' + shp_key + '_idx.zip'
 
             frame_name = key.split('/')[-1].replace('.tif','')
-            if 'mosaic' not in frame_name and '/mosaic/' not in key and '/index/' not in key:
+            if 'mosaic' not in frame_name and '/mosaic/' not in key and '/index/' not in key and '/StratMap/' not in key:
                 date = frame_name.split('_')[0]
                 if "-" in frame_name.split('_')[1]:
                     roll = frame_name.split('_')[1].split('-')[0]
@@ -99,14 +99,18 @@ def lambda_handler(event, context):
                         print(no_roll_agencies)
                         print(key)
                         raise ValueError('no roll in filename and agency not in no_roll_agencies')
-            elif 'mosaic' not in frame_name and '/mosaic/' not in key and '/index/' in key:
+            elif 'mosaic' not in frame_name and '/mosaic/' not in key and '/index/' in key and '/StratMap/' not in key:
                 roll = frame_name.split('_')[0]
                 date = frame_name.split('_')[1]
                 frame_num = frame_name.split('_')[2]
-            elif 'mosaic' in frame_name and '/mosaic/' in key and '/index/' not in key:
+            elif 'mosaic' in frame_name and '/mosaic/' in key and '/index/' not in key and '/StratMap/' not in key:
                 date = 'MULTIPLE'
                 roll = 'MULTIPLE'
                 frame_num = frame_name.replace("mosaic", "")
+            elif '/StratMap/' in key:
+                date = frame_name.split('_')[2]
+                roll = frame_name.split('_')[0]
+                frame_num = frame_name.split('_')[1]
 
             bounds = dataset.bounds
             df = df.append({'location':location, 'src_srs': src_srs, 'date': date, 'roll': roll, 'frame_num': frame_num, 'dl_orig': dl_orig, 'dl_georef': dl_georef, 'dl_index': dl_index, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)

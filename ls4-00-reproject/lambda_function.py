@@ -52,7 +52,7 @@ def lambda_handler(event, context):
         return
     else:
         dst_crs = 'EPSG:3857'
-        prefix = '/vsis3/' + source_bucket + '/'
+        prefix = 's3://' + source_bucket + '/'
         s3_path = prefix + source_key
         epsg_folder = 'georef/' + epsg_sub_dir
         upload_key = source_key.replace('georef/', epsg_folder).replace('TIF', 'tif')
