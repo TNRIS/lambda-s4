@@ -60,10 +60,10 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 * Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...).
 * This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).
 * General 'atime' process to removed unused dependency files:
-  1. enable atime file metadata
-  2. cd into function. dependencies requirements need to be installed and moved into this directory as if ready for lambda deployment (`make pack-%` from root to move dependencies)
+  1. enable atime file metadata. this happens on the mounted volume your lambda function script it on. `df -h ./lambda_function.py` to find the volume 'Filesystem'. `sudo mount -o remount,strictatime /dev/mapper/fedora-home` swapping your 'Filesystem' will enable it.
+  2. cd into function. dependencies requirements need to be installed with your virtual environment enabled and moved into this directory as if ready for lambda deployment (`make pack-%` from root to move dependencies)
   3. create arbitrary file to compare against (`touch start`)
-  4. run function
+  4. run function. rasterio is utilizing gdal's /vsis3/ and requires the function to be run with AWS key/secret as environment variables: `export AWS_ACCESS_KEY_ID=<aws access key> && export AWS_SECRET_ACCESS_KEY=<aws secret key> && python lambda_function.py`
   5. create txt list of files with atime later than arbitrary file. these are the files in the dependencies that are actually used by the function: `find <path to function> -type f -anewer ./start > dep_whitelist.txt`
   6. run dep_cleanup.py (depends on 'dep_whitelist.txt' file) to remove all unused files from function folder
   7. zip function and deploy
