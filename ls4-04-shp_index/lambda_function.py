@@ -74,13 +74,14 @@ def lambda_handler(event, context):
     # file shapefile data container
     for key in cog_keys:
         with rasterio.open(key) as dataset:
+            print(key)
             fly = key.split('/')[-4]
             if "_" in fly:
                 agency = fly.split("_")[0]
             else:
                 agency = ''
 
-            location = key
+            location = key.replace('s3://', '/vsis3/')
             dl_orig = key.replace('s3://', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
             dl_georef = key.replace('s3://', 'https://s3.amazonaws.com/')
             dl_index = 'https://s3.amazonaws.com/' + source_bucket + '/' + shp_key + '_idx.zip'

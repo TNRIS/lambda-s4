@@ -58,5 +58,6 @@ ls4-00-reproject/*
 !ls4-00-reproject/lambda_function.py
 !ls4-00-reproject/requirements.txt
 !ls4-00-reproject/dep_cleanup.py
+!ls4-00-reproject/README.md
 
 data/test/reproj/

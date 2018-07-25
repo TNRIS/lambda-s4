@@ -1,10 +1,8 @@
 # --------------- IMPORTS ---------------
 import os
 import boto3
-import numpy as np
-import rasterio
-from rasterio.warp import calculate_default_transform, reproject, Resampling
 import json
+import gdal
 
 georef_sub_dir = os.environ.get('georefSubDir')
 epsg_sub_dir = os.environ.get('epsgSubDir')
@@ -52,63 +50,46 @@ def lambda_handler(event, context):
         return
     else:
         dst_crs = 'EPSG:3857'
-        prefix = 's3://' + source_bucket + '/'
+        prefix = '/vsis3/' + source_bucket + '/'
         s3_path = prefix + source_key
         epsg_folder = 'georef/' + epsg_sub_dir
         upload_key = source_key.replace('georef/', epsg_folder).replace('TIF', 'tif')
-        with rasterio.open(s3_path) as src:
-            print(src.crs)
-            # print(src.crs['init'])
+
+        try:
+            epsg = int(gdal.Info(s3_path, format='json')['coordinateSystem']['wkt'].rsplit('"EPSG","', 1)[-1].split('"')[0])
+            print(epsg)
+        except Exception as e:
+            print(e)
+            print("no epsg. uh oh... this raster is probably georeferenced but wasn't exported to GeoTiff")
+            epsg = ''
+
+        if epsg != 3857:
+            print("let's reproject...")
+            reprojected_tif = '/tmp/reprojected.tif'
             try:
-                crs_init = src.crs['init']
-            except:
-                print("no crs init. uh oh... this raster is probably georeferenced but wasn't exported to GeoTiff")
-                crs_init = ''
+                gdal.Warp(reprojected_tif,s3_path,dstSRS=dst_crs)
+            except Exception as e:
+                print(e)
+            # connect to s3
+            client = boto3.client('s3')
+            print('uploading reprojected tif')
+            client.upload_file(reprojected_tif, source_bucket, upload_key)
+            # cleanup /tmp
+            print('cleaning up /tmp')
+            os.remove(reprojected_tif)
 
-            if crs_init != 'epsg:3857':
-                print("let's reproject...")
-                transform, width, height = calculate_default_transform(
-                    src.crs, dst_crs, src.width, src.height, *src.bounds)
-                kwargs = src.meta.copy()
-                kwargs.update({
-                    'crs': dst_crs,
-                    'transform': transform,
-                    'width': width,
-                    'height': height
-                })
-                print('transformation variables compiled')
-                reprojected_tif = '/tmp/reprojected.tif'
-                with rasterio.open(reprojected_tif, 'w', **kwargs) as dst:
-                    for i in range(1, src.count + 1):
-                        reproject(
-                            source=rasterio.band(src, i),
-                            destination=rasterio.band(dst, i),
-                            src_transform=src.transform,
-                            src_crs=src.crs,
-                            dst_transform=transform,
-                            dst_crs=dst_crs,
-                            resampling=Resampling.nearest)
-                    print('reprojected!')
-                # connect to s3
-                client = boto3.client('s3')
-                print('uploading reprojected tif')
-                client.upload_file(reprojected_tif, source_bucket, upload_key)
-                # cleanup /tmp
-                print('cleaning up /tmp')
-                os.remove(reprojected_tif)
+        else:
+            print("already EPSG 3857; nothing to do here.")
 
-            else:
-                print("already EPSG 3857; nothing to do here.")
-
-            print('invoking ls4-01-compress')
-            client = boto3.client('lambda')
-            payload = {'sourceBucket': source_bucket, 'sourceKey': upload_key}
-            response = client.invoke(
-                FunctionName='ls4-01-compress',
-                InvocationType='Event',
-                Payload=json.dumps(payload)
-            )
-            print(response)
+        print('invoking ls4-01-compress')
+        client = boto3.client('lambda')
+        payload = {'sourceBucket': source_bucket, 'sourceKey': upload_key}
+        response = client.invoke(
+            FunctionName='ls4-01-compress',
+            InvocationType='Event',
+            Payload=json.dumps(payload)
+        )
+        print(response)
     print("that's all folks!!")
 
 
