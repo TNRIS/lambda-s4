@@ -73,8 +73,18 @@ def lambda_handler(event, context):
     no_roll_agencies = ['AMS', 'USGS']
     # file shapefile data container
     for key in cog_keys:
+        print(key)
         with rasterio.open(key) as dataset:
-            print(key)
+            print(dataset.crs)
+            try:
+                 crs_init = dataset.crs['init'].upper()
+                 print(crs_init)
+                 if crs_init != src_srs:
+                     src_srs = crs_init
+             except Exception as e:
+                 print(e)
+                 print("most likely no crs init (georeferenced but wasn't exported to GeoTiff) or StratMap product")
+
             fly = key.split('/')[-4]
             if "_" in fly:
                 agency = fly.split("_")[0]
@@ -112,6 +122,8 @@ def lambda_handler(event, context):
                 date = frame_name.split('_')[2]
                 roll = frame_name.split('_')[0]
                 frame_num = frame_name.split('_')[1]
+                epsg = frame_name.split('_')[3]
+                src_srs = 'EPSG:%s' % epsg
 
             bounds = dataset.bounds
             df = df.append({'location':location, 'src_srs': src_srs, 'date': date, 'roll': roll, 'frame_num': frame_num, 'dl_orig': dl_orig, 'dl_georef': dl_georef, 'dl_index': dl_index, 'geometry': box(bounds[0], bounds[1], bounds[2], bounds[3])},ignore_index=True)

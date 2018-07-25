@@ -61,3 +61,5 @@ ls4-00-reproject/*
 !ls4-00-reproject/README.md
 
 data/test/reproj/
+
+gdalmanylinux/
