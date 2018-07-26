@@ -31,6 +31,7 @@ def lambda_handler(event, context):
         client = boto3.client('s3')
         response = client.put_object_acl(ACL='public_read',Bucket=source_bucket,Key=source_key)
         print(response)
+        gdal.VSICurlClearCache()
         return
 
     # verify input is a georef upload
@@ -54,7 +55,7 @@ def lambda_handler(event, context):
         s3_path = prefix + source_key
         epsg_folder = 'georef/' + epsg_sub_dir
         upload_key = source_key.replace('georef/', epsg_folder).replace('TIF', 'tif')
-
+        gdal.VSICurlClearCache()
         try:
             epsg = int(gdal.Info(s3_path, format='json')['coordinateSystem']['wkt'].rsplit('"EPSG","', 1)[-1].split('"')[0])
             print(epsg)
@@ -74,6 +75,7 @@ def lambda_handler(event, context):
             client = boto3.client('s3')
             print('uploading reprojected tif')
             client.upload_file(reprojected_tif, source_bucket, upload_key)
+            gdal.VSICurlClearCache()
             # cleanup /tmp
             print('cleaning up /tmp')
             os.remove(reprojected_tif)
