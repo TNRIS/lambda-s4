@@ -14,24 +14,37 @@ function systemSync(cmd) {
 };
 
 exports.handler = (event, context, callback) => {
-      var sourceBucket = event.sourceBucket;
-      var sourceKey =  event.sourceKey;
+      // If not invoked directly then treat as coming from S3
+      if (!event.sourceBucket) {
+        if (event.Records[0].s3.bucket.name) {
+          console.log(event.Records[0].s3);
+          var sourceBucket = event.Records[0].s3.bucket.name;
+          var sourceKey = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, ' '));
+        }
+        else {
+          console.error ('no source bucket defined');
+        }
+      }
+      else {
+        var sourceBucket = event.sourceBucket;
+        var sourceKey =  event.sourceKey;
+      }
 
       // update ACL for uploaded /scanned tif
       // /scanned tif only exists for frames and indexes - NOT mosaics
       // this section needs to be commented if using ls4-00-reproject in the workflow
-      if (sourceKey.includes('/frames/scanned/') || sourceKey.includes('/index/scanned/')) {
-        console.log(sourceKey);
-        var scannedParams = {
-          Bucket: sourceBucket,
-          Key: sourceKey,
-          ACL: 'public-read'
-        };
-        s3.putObjectAcl(scannedParams, function(err, data) {
-          if (err) console.log(err, err.stack); // an error occurred
-          else     console.log('scanned tif ACL update success!'); // successful response
-        });
-      }
+      // if (sourceKey.includes('/frames/scanned/') || sourceKey.includes('/index/scanned/')) {
+      //   console.log(sourceKey);
+      //   var scannedParams = {
+      //     Bucket: sourceBucket,
+      //     Key: sourceKey,
+      //     ACL: 'public-read'
+      //   };
+      //   s3.putObjectAcl(scannedParams, function(err, data) {
+      //     if (err) console.log(err, err.stack); // an error occurred
+      //     else     console.log('scanned tif ACL update success!'); // successful response
+      //   });
+      // }
 
       // escape if s3 event triggered by scanned upload or cog output
       if (!sourceKey.includes('/georef/')) {
@@ -40,17 +53,17 @@ exports.handler = (event, context, callback) => {
         return
       }
       // this section needs to be uncommented if using ls4-00-reproject in the workflow
-      // else if (!sourceKey.includes(process.env.epsgSubDir)) {
-      //   console.log("error: key doesn't include the 'epsgSubDir' env variable. exiting...");
-      //   console.log(sourceKey);
-      //   return
-      // }
-      // this section needs to be commented if using ls4-00-reproject in the workflow
-      else if (sourceKey.includes(process.env.georefSubDir)) {
-        console.log("error: key includes the 'georefSubDir' env variable. exiting...");
+      else if (!sourceKey.includes(process.env.epsgSubDir)) {
+        console.log("error: key doesn't include the 'epsgSubDir' env variable. exiting...");
         console.log(sourceKey);
         return
       }
+      // this section needs to be commented if using ls4-00-reproject in the workflow
+      // else if (sourceKey.includes(process.env.georefSubDir)) {
+      //   console.log("error: key includes the 'georefSubDir' env variable. exiting...");
+      //   console.log(sourceKey);
+      //   return
+      // }
       else {
         console.log('Source Bucket: ' + sourceBucket);
         console.log('Source Key: ' + sourceKey);
@@ -95,10 +108,10 @@ exports.handler = (event, context, callback) => {
         var filename = srcKeyParts[srcKeyParts.length-1];
         var fileWithSubDir = process.env.georefSubDir + filename;
         // this line needs to be commented if using ls4-00-reproject in the workflow
-        var uploadKey = sourceKey.replace(filename, fileWithSubDir);
+        // var uploadKey = sourceKey.replace(filename, fileWithSubDir).replace('TIF', 'tif');
         // this section needs to be uncommented if using ls4-00-reproject in the workflow
-        // var fileWithEpsg = process.env.epsgSubDir + filename;
-        // var uploadKey = sourceKey.replace(fileWithEpsg, fileWithSubDir);
+        var fileWithEpsg = process.env.epsgSubDir + filename;
+        var uploadKey = sourceKey.replace(fileWithEpsg, fileWithSubDir);
         console.log('uploadKey: ' + uploadKey);
 
         var body = fs.createReadStream('/tmp/output.tif');

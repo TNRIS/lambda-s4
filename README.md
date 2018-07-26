@@ -54,16 +54,31 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 
 ---
 
-## Rasterio needs ManyLinux Wheels
+<!-- ## Rasterio needs ManyLinux Wheels
 
 * `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`
+ -->
+
+## GDAL needs ManyLinux Wheels
+
+https://github.com/youngpm/gdalmanylinux
+
+`ls4-00-reproject` and `ls4-04-shp_index` and use GDAL w/ManyLinux Wheels
+
+1. make a new virtual env for the function
+2. clone the repo above into this repor folder
+3. from the this repo folder: `cd gdalmanylinux`
+4. `make wheels`. this takes awhile 'but once complete you should have a subdirectory called wheels'
+5. `cd ..` back into the repo directory
+6. `pip install ./gdalmanylinux/wheels/GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
+
 * Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...).
 * This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).
 * General 'atime' process to removed unused dependency files:
   1. enable atime file metadata. this happens on the mounted volume your lambda function script it on. `df -h ./lambda_function.py` to find the volume 'Filesystem'. `sudo mount -o remount,strictatime /dev/mapper/fedora-home` swapping your 'Filesystem' will enable it.
   2. cd into function. dependencies requirements need to be installed with your virtual environment enabled and moved into this directory as if ready for lambda deployment (`make pack-%` from root to move dependencies)
   3. create arbitrary file to compare against (`touch start`)
-  4. run function. rasterio is utilizing gdal's /vsis3/ and requires the function to be run with AWS key/secret as environment variables: `export AWS_ACCESS_KEY_ID=<aws access key> && export AWS_SECRET_ACCESS_KEY=<aws secret key> && python lambda_function.py`
+  4. run function.
   5. create txt list of files with atime later than arbitrary file. these are the files in the dependencies that are actually used by the function: `find <path to function> -type f -anewer ./start > dep_whitelist.txt`
   6. run dep_cleanup.py (depends on 'dep_whitelist.txt' file) to remove all unused files from function folder
   7. zip function and deploy
@@ -77,7 +92,7 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 * `ls4-00-reproject`, `ls4-04-shp_index`, & `ls4-05-mapfile` are python functions which require copying dependencies from site-packages to function folder for deployment.
 * JS functions only have their `./bin/<gdal binary>` as a dependency and don't need others transferred.
 * if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
-* `ls4-04-shp_index` is a special case as it uses Rasterio and ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
+* `ls4-04-shp_index` is a special case as it uses GDAL with ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
 * then run `make pack-<function/folder name>` from project root to copy dependencies from site-packages into function folder.
 * zip contents and upload if testing. otherwise, head over to TNRIS deployments for the Terraform deployment of the functions and Mapserver instance.
 
