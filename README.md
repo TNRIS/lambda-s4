@@ -62,6 +62,7 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 ## GDAL needs ManyLinux Wheels
 
 https://github.com/youngpm/gdalmanylinux
+(for preservation this repo has been forked by TNRIS)
 
 `ls4-00-reproject` and `ls4-04-shp_index` and use GDAL w/ManyLinux Wheels
 
