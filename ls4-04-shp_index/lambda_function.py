@@ -3,7 +3,7 @@ import os
 import zipfile
 import boto3
 import geopandas as gpd
-import gdal
+from osgeo import gdal
 from shapely.geometry import box
 from geoalchemy2 import Geometry, WKTElement
 from sqlalchemy import create_engine
@@ -108,6 +108,7 @@ def lambda_handler(event, context):
             date = 'MULTIPLE'
             roll = 'MULTIPLE'
             frame_num = frame_name.replace("mosaic", "")
+            dl_orig = 'N/A'
         elif '/StratMap/' in key:
             date = frame_name.split('_')[2]
             roll = frame_name.split('_')[0]
