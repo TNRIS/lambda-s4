@@ -66,12 +66,16 @@ https://github.com/youngpm/gdalmanylinux
 
 `ls4-00-reproject` and `ls4-04-shp_index` and use GDAL w/ManyLinux Wheels
 
+#### how to rebuild the wheels
 1. make a new virtual env for the function
-2. clone the repo above into this repor folder
+2. clone the repo above into this repo folder
 3. from the this repo folder: `cd gdalmanylinux`
 4. `make wheels`. this takes awhile 'but once complete you should have a subdirectory called wheels'
 5. `cd ..` back into the repo directory
 6. `pip install ./gdalmanylinux/wheels/GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
+
+#### alternatively, use the repo-saved python 3.6 wheel
+1. from the repo base, `pip install ./GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
 
 * Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...).
 * This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).
