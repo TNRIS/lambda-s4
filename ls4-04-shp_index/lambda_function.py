@@ -104,6 +104,8 @@ def lambda_handler(event, context):
             roll = frame_name.split('_')[0]
             date = frame_name.split('_')[1]
             frame_num = frame_name.split('_')[2]
+            tile_num = '_' + frame_name.split('_')[3]
+            dl_orig = dl_orig.replace(tile_num, '')
         elif 'mosaic' in frame_name and '/mosaic/' in key and '/index/' not in key and '/StratMap/' not in key:
             date = 'MULTIPLE'
             roll = 'MULTIPLE'
