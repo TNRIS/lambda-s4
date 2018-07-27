@@ -6,6 +6,8 @@ import gdal
 
 georef_sub_dir = os.environ.get('georefSubDir')
 epsg_sub_dir = os.environ.get('epsgSubDir')
+aws_account = os.environ.get('AWS_ACCOUNT_ID')
+sns_error_topic = os.environ.get('SNS_ERROR_TOPIC')
 
 # --------------- Main handler ------------------
 
@@ -64,6 +66,8 @@ def lambda_handler(event, context):
             print("no epsg. uh oh... this raster is probably georeferenced but wasn't exported to GeoTiff")
             epsg = ''
 
+        # connect to s3
+        client = boto3.client('s3')
         if epsg != 3857:
             print("let's reproject...")
             reprojected_tif = '/tmp/reprojected.tif'
@@ -71,8 +75,7 @@ def lambda_handler(event, context):
                 gdal.Warp(reprojected_tif,s3_path,dstSRS=dst_crs)
             except Exception as e:
                 print(e)
-            # connect to s3
-            client = boto3.client('s3')
+
             print('uploading reprojected tif')
             client.upload_file(reprojected_tif, source_bucket, upload_key)
             gdal.VSICurlClearCache()
@@ -81,7 +84,8 @@ def lambda_handler(event, context):
             os.remove(reprojected_tif)
 
         else:
-            print("already EPSG 3857; nothing to do here.")
+            print("already EPSG 3857; copying to epsg folder.")
+            client.copy(s3_path, source_bucket, upload_key)
 
         print('invoking ls4-01-compress')
         client = boto3.client('lambda')
@@ -92,6 +96,37 @@ def lambda_handler(event, context):
             Payload=json.dumps(payload)
         )
         print(response)
+
+        # check if original exists in /scanned
+        client = boto3.client('s3')
+        # /scanned tif only exists for frames and indexes - NOT mosaics
+        if '/frames/georef/' in source_key or '/index/georef/' in source_key:
+            orig = source_key.replace('georef/', 'scanned/')
+            # original index uploads don't include tiled number
+            if '/index/' in orig:
+                tile_num = orig.split('/')[-1].split('_')[-1].replace('.tif', '').replace('.TIF', '')
+                orig = orig.replace('_' + tile_num, '')
+            try:
+                r = client.head_object(Bucket=source_bucket, Key=orig)
+                print('original exists at %s' % orig)
+            except Exception as e:
+                print(e)
+                # publish message to the project SNS topic
+                sns = boto3.resource('sns')
+                arn = 'arn:aws:sns:us-east-1:%s:%s' % (aws_account, sns_error_topic)
+                topic = sns.Topic(arn)
+                m = ("GeoTiff uploaded at '%s' in the LS4 bucket is missing "
+                     "it's original in the relative /scanned folder. Expected "
+                     "it to exist at '%s'. Please upload it now while you're "
+                     "doing LS4y stuffs. Might as well... ya know? Thanks "
+                     "friend!" % (source_key, orig)
+                    )
+                response = topic.publish(
+                    Message=m,
+                    Subject='LS4 Notification'
+                )
+                print('original /scanned not in s3. sns error message dispatched.')
+
     print("that's all folks!!")
 
 
