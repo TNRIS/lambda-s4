@@ -85,7 +85,7 @@ def lambda_handler(event, context):
 
         else:
             print("already EPSG 3857; copying to epsg folder.")
-            client.copy(s3_path, source_bucket, upload_key)
+            client.copy({'Bucket': source_bucket, 'Key': source_key}, source_bucket, upload_key)
 
         print('invoking ls4-01-compress')
         client = boto3.client('lambda')
