@@ -104,8 +104,9 @@ def lambda_handler(event, context):
             orig = source_key.replace('georef/', 'scanned/')
             # original index uploads don't include tiled number
             if '/index/' in orig:
-                tile_num = orig.split('/')[-1].split('_')[-1].replace('.tif', '').replace('.TIF', '')
-                orig = orig.replace('_' + tile_num, '')
+                tile_num = orig.split('/')[-1].split('_')[-1]
+                sfx = tile_num.split('.')[-1]
+                orig = orig.replace('_' + tile_num, '.' + sfx)
             try:
                 r = client.head_object(Bucket=source_bucket, Key=orig)
                 print('original exists at %s' % orig)
