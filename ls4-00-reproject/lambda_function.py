@@ -111,21 +111,33 @@ def lambda_handler(event, context):
                 print('original exists at %s' % orig)
             except Exception as e:
                 print(e)
-                # publish message to the project SNS topic
-                sns = boto3.resource('sns')
-                arn = 'arn:aws:sns:us-east-1:%s:%s' % (aws_account, sns_error_topic)
-                topic = sns.Topic(arn)
-                m = ("GeoTiff uploaded at '%s' in the LS4 bucket is missing "
-                     "it's original in the relative /scanned folder. Expected "
-                     "it to exist at '%s'. Please upload it now while you're "
-                     "doing LS4y stuffs. Might as well... ya know? Thanks "
-                     "friend!" % (source_key, orig)
+                # try alternative extension
+                try:
+                    if '.tif' in orig:
+                        alt = orig.replace('.tif', '.TIF')
+                    elif '.TIF' in orig:
+                        alt = orig.replace('.TIF', '.tif')
+                    else:
+                        raise Exception('no tif or TIF extension!')
+                    r = client.head_object(Bucket=source_bucket, Key=alt)
+                    print('original exists at %s' % alt)
+                except Exception as e:
+                    print(e)
+                    # publish message to the project SNS topic
+                    sns = boto3.resource('sns')
+                    arn = 'arn:aws:sns:us-east-1:%s:%s' % (aws_account, sns_error_topic)
+                    topic = sns.Topic(arn)
+                    m = ("GeoTiff uploaded at '%s' in the LS4 bucket is missing "
+                         "it's original in the relative /scanned folder. Expected "
+                         "it to exist at '%s'. Please upload it now while you're "
+                         "doing LS4y stuffs. Might as well... ya know? Thanks "
+                         "friend!" % (source_key, orig)
+                        )
+                    response = topic.publish(
+                        Message=m,
+                        Subject='LS4 Notification'
                     )
-                response = topic.publish(
-                    Message=m,
-                    Subject='LS4 Notification'
-                )
-                print('original /scanned not in s3. sns error message dispatched.')
+                    print('original /scanned not in s3. sns error message dispatched.')
 
     print("that's all folks!!")
 
