@@ -1,0 +1,7 @@
+1. fuse connect a local drive to the bucket
+2. create/edit a mapfile (test.map) with templating in config (MAP > WEB section).
+3. drop off test.map mapfile into the mapfiles directory on s3
+4. `sudo docker run --detach -v <path to fuse directory>/mapfiles:/mapfiles:ro --publish 8080:80 --name mapserver <aws acct #>.dkr.ecr.us-east-1.amazonaws.com/<ECR repo name>`
+5. then `localhost:8080` wms link to test.map service in a browser to try and view the template...
+
+have fun!
