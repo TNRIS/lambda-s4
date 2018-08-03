@@ -8,8 +8,10 @@ for file in os.listdir(dir):
     try:
         if os.path.isfile(file_path):
             sfx = file_path[-4:]
-            if sfx != '.tif':
-                print('deleting: ', file_path)
+            arcpy.AddMessage(file_path)
+            arcpy.AddMessage(sfx)
+            if sfx != ".tif" and sfx != ".TIF":
+                arcpy.AddMessage("deleting: " + file_path)
                 os.remove(file_path)
 
     except Exception as e:
