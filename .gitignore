@@ -60,6 +60,10 @@ ls4-00-reproject/*
 !ls4-00-reproject/dep_cleanup.py
 !ls4-00-reproject/README.md
 
+ls4-compile_indexes/*
+!ls4-compile_indexes/lambda_function.py
+!ls4-compile_indexes/requirements.txt
+
 data/test/reproj/
 
 gdalmanylinux/

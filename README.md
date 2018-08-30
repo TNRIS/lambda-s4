@@ -48,9 +48,11 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 
 ---
 
-## Maintenance
+## Maintenance & Such
 
-`ls4-maintenance` is a Cloudwatch scheduled lambda function which runs every 24 hours and performs simple validation checks accross the project infrastructure. If invalid situations are identified, the function handles any deletions as necessary and then notifys a project SNS topic for developer awareness and potential follow up.
+* `ls4-maintenance` is a Cloudwatch scheduled lambda function which runs every 24 hours and performs simple validation checks accross the project infrastructure. If invalid situations are identified, the function handles any deletions as necessary and then notifys a project SNS topic for developer awareness and potential follow up.
+
+* `ls4-compile_indexes` is a Cloudwatch scheduled lambda function which runs every hour to collect the tile indexes from the RDS database and collect them into a single .geojson file and dumps it into S3. Carto then sync's with this file in S3 to provide a comprehensive index dataset of all imagery processed by the engine.
 
 ---
 
@@ -95,7 +97,7 @@ https://github.com/youngpm/gdalmanylinux
 
 ## Deployment
 
-* `ls4-00-reproject`, `ls4-04-shp_index`, & `ls4-05-mapfile` are python functions which require copying dependencies from site-packages to function folder for deployment.
+* `ls4-00-reproject`, `ls4-04-shp_index`, `ls4-05-mapfile`, `ls4-maintenance`, & `ls4-compile_indexes` are python functions which require copying dependencies from site-packages to function folder for deployment.
 * JS functions only have their `./bin/<gdal binary>` as a dependency and don't need others transferred.
 * if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
 * `ls4-04-shp_index` is a special case as it uses GDAL with ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
