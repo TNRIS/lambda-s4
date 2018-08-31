@@ -44,7 +44,7 @@ def lambda_handler(event, context):
         if sfx in types:
             print(table[0])
             # get the records
-            rec_query = "SELECT dl_orig, dl_georef, dl_index, ST_AsGeoJSON(geom) FROM %s" % table[0]
+            rec_query = "SELECT dl_orig, dl_georef, dl_index, ST_AsGeoJSON(ST_Transform(geom, 4326)) FROM %s" % table[0]
             cur.execute(rec_query)
             result = cur.fetchall()
             # iterate records in table
