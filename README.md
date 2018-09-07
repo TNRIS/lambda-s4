@@ -79,6 +79,9 @@ https://github.com/youngpm/gdalmanylinux
 #### alternatively, use the repo-saved python 3.6 wheel
 1. from the repo base, `pip install ./GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
 
+#### ubuntu: extra step!
+1. `export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt` to set location for SSl Certs on the host (add it to .bashrc so you don't have to re-set this ENV variable every new terminal). This step is not needed on Fedora, CentOS, etc. since the default libcurl assumes you're running on a fedora based distribution
+
 #### why this special GDAL package?
 * Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...).
 * This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).

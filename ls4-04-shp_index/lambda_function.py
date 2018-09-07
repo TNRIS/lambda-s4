@@ -104,8 +104,23 @@ def lambda_handler(event, context):
             roll = frame_name.split('_')[0]
             date = frame_name.split('_')[1]
             frame_num = frame_name.split('_')[2]
-            tile_num = '_' + frame_name.split('_')[3]
-            dl_orig = dl_orig.replace(tile_num, '')
+            try:
+                tile_num = '_' + frame_name.split('_')[3]
+                if 'dpi' not in tile_num:
+                    print("not a special dpi noted index. dl_orig for regular ol' tile...")
+                    orig_filename = roll + "_" + date + "_" + frame_num + ".tif"
+                    dl_orig = dl_orig.replace(dl_orig.split('/')[-1], orig_filename)
+                else:
+                    print("this is a special dpi noted index: " + tile_num)
+                    try:
+                        test_tile_num = '_' + frame_name.split('_')[4]
+                        orig_filename = roll + "_" + date + "_" + frame_num + tile_num + ".tif"
+                        dl_orig = dl_orig.replace(dl_orig.split('/')[-1], orig_filename)
+                    except:
+                        print("special dpi noted index but no tile number? a tad funny, this one is.")
+
+            except:
+                print("No tile number as designated by split '_' position 3. dl_orig unchanged.")
         elif 'mosaic' in frame_name and '/mosaic/' in key and '/index/' not in key and '/StratMap/' not in key:
             date = 'MULTIPLE'
             roll = 'MULTIPLE'
