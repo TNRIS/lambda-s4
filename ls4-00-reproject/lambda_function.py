@@ -31,7 +31,7 @@ def lambda_handler(event, context):
         print('updating scanned/ tif ACL to public-read')
         print(source_key)
         client = boto3.client('s3')
-        response = client.put_object_acl(ACL='public_read',Bucket=source_bucket,Key=source_key)
+        response = client.put_object_acl(ACL='public-read',Bucket=source_bucket,Key=source_key)
         print(response)
         gdal.VSICurlClearCache()
         return
