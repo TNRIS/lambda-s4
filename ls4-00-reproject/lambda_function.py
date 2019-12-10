@@ -13,6 +13,7 @@ sns_error_topic = os.environ.get('SNS_ERROR_TOPIC')
 
 def lambda_handler(event, context):
     print(event)
+    gdal.UseExceptions()  # Enable errors
     # establish some variables
 
     # prepare input event
@@ -75,6 +76,26 @@ def lambda_handler(event, context):
                 gdal.Warp(reprojected_tif,s3_path,dstSRS=dst_crs)
             except Exception as e:
                 print(e)
+                # publish message to the project SNS topic
+                sns = boto3.resource('sns')
+                arn = 'arn:aws:sns:us-east-1:%s:%s' % (aws_account, sns_error_topic)
+                topic = sns.Topic(arn)
+                m = ("KEY: %s \nEPSG: %s \n\n"
+                        "GeoTiff uploaded at '%s' in the LS4 bucket encountered an issue "
+                        "when running gdal.warp() to reproject into EPSG 3857. The EPSG "
+                        "was identified as '%s' and unfortunately, threw the error: "
+                        "\n\n%s\n\n "
+                        "Check to make sure the uploaded .tif was properly exported as "
+                        "a GeoTiff (WGS84 EPSG:4326 or WGS84 Web Mercator-Auxiliary "
+                        "Sphere EPSG:3857 preferred) and try again. Or notify the IS Team "
+                        "for help. Thanks friend!" % (source_key, epsg, source_key, epsg, e)
+                    )
+                response = topic.publish(
+                    Message=m,
+                    Subject='LS4 Notification'
+                )
+                print('gdal warp reproject error. sns error message dispatched.')
+                return
 
             print('uploading reprojected tif')
             client.upload_file(reprojected_tif, source_bucket, upload_key)
