@@ -56,19 +56,17 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 
 ---
 
-<!-- ## Rasterio needs ManyLinux Wheels
-
-* `cd ls4-04-shp_index` and `pip install -r requirements.txt`. [info here](https://github.com/mapbox/rasterio/issues/942) on installing with `pip install --pre rasterio[s3]>=1.0a4`
- -->
-
 ## GDAL needs ManyLinux Wheels
 
 https://github.com/youngpm/gdalmanylinux
 (for preservation this repo has been forked by TNRIS)
 
-`ls4-00-reproject` and `ls4-04-shp_index` and use GDAL w/ManyLinux Wheels. Install the wheel before installing the other function specific requirements from the function's requirements.txt file.
+`ls4-00-reproject` and `ls4-04-shp_index` and use GDAL w/ManyLinux Wheels. **Install the wheel before installing the other function specific requirements from the function's requirements.txt file.**
 
-#### how to rebuild the wheels
+#### preferable, use the repo-saved python 3.6 wheel
+1. from the repo base, `pip install ./GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
+
+#### alternatively, how to rebuild the wheels
 1. make a new virtual env for the function
 2. clone the repo above into this repo folder
 3. from the this repo folder: `cd gdalmanylinux`
@@ -76,13 +74,21 @@ https://github.com/youngpm/gdalmanylinux
 5. `cd ..` back into the repo directory
 6. `pip install ./gdalmanylinux/wheels/GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
 
-#### alternatively, use the repo-saved python 3.6 wheel
-1. from the repo base, `pip install ./GDAL-2.3.0-cp36-cp36m-manylinux1_x86_64.whl`
-
 #### ubuntu: extra step!
 1. `export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt` to set location for SSl Certs on the host (add it to .bashrc so you don't have to re-set this ENV variable every new terminal). This step is not needed on Fedora, CentOS, etc. since the default libcurl assumes you're running on a fedora based distribution
 
-#### why this special GDAL package?
+---
+
+## Deployment
+
+* `ls4-00-reproject`, `ls4-04-shp_index`, `ls4-05-mapfile`, `ls4-maintenance`, & `ls4-compile_indexes` are python functions which require copying dependencies from site-packages to function folder for deployment.
+* JS functions only have their `./bin/<gdal binary>` as a dependency and don't need others transferred.
+* if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
+* `ls4-04-shp_index` is a special case as it uses GDAL with ManyLinux Wheels. See section below on preparing its' dependencies for deployment as it differs from any other lambda preparation.
+* then run `make pack-<function/folder name>` from project root to copy dependencies from site-packages into function folder.
+* zip contents and upload if testing. otherwise, head over to TNRIS deployments for the Terraform deployment of the functions and Mapserver instance.
+
+#### ls4-04-shp_index has a special deployment!!!
 * Problem is the deployment package is too large. It must be < 50mb to upload directly to lambda. If larger, we can upload to s3 and point lambda to it but unzipped still must be < 250mb (which this isn't...).
 * This means we must use `atime` (accessed/modified time) metadata on the filesystem after running the function locally to identify the wheat from the chaff in all the dependency packages. [Problem and atime usage method described here](https://medium.com/@mojodna/slimming-down-lambda-deployment-zips-b3f6083a1dff). [On Fedora, i had to enable atime using 'strictatime'](https://bugzilla.redhat.com/show_bug.cgi?id=756670).
 * General 'atime' process to removed unused dependency files:
@@ -95,17 +101,6 @@ https://github.com/youngpm/gdalmanylinux
   7. zip function and deploy
 * Originally: 7,716 items - 344.0 MB
 * After dep_cleanup: 2,072 items - 154.0 MB (44 MB compressed!)
-
----
-
-## Deployment
-
-* `ls4-00-reproject`, `ls4-04-shp_index`, `ls4-05-mapfile`, `ls4-maintenance`, & `ls4-compile_indexes` are python functions which require copying dependencies from site-packages to function folder for deployment.
-* JS functions only have their `./bin/<gdal binary>` as a dependency and don't need others transferred.
-* if using separate virtual envs for python functions (**as you should be**) then enable it for the function being deployed.
-* `ls4-04-shp_index` is a special case as it uses GDAL with ManyLinux Wheels. See section above on preparing its' dependencies for deployment as it differs from any other lambda preparation.
-* then run `make pack-<function/folder name>` from project root to copy dependencies from site-packages into function folder.
-* zip contents and upload if testing. otherwise, head over to TNRIS deployments for the Terraform deployment of the functions and Mapserver instance.
 
 ---
 
