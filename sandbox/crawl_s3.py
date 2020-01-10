@@ -61,7 +61,6 @@ if bucket != '':
             if key not in lore:
                 print(key)
                 not_in_public_lore.append(key)
-            client = boto3.client('s3')
             # response = client.put_object_acl(ACL='public-read',Bucket=bucket,Key=key)
             # print(key)
         if (
