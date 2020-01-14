@@ -40,7 +40,7 @@ if q_bucket != '' and ls4_bucket != '':
                 ls4_deets.append([county, agency, year, sheet])
                 # print(county, agency, year, sheet)
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
-                    print(c['Key'])
+                    print('what the TIF???' + c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
@@ -81,9 +81,9 @@ if q_bucket != '' and ls4_bucket != '':
                         q_deets.append([county, agency, year, sheet])
                         # print(county, agency, year, sheet)
                     except:
-                        print(c['Key'])
+                        print('issue getting county, agency, year, & sheet:' + c['Key'])
                 if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
-                    print(c['Key'])
+                    print('what the TIF???' + c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
@@ -101,15 +101,19 @@ if q_bucket != '' and ls4_bucket != '':
     print('ls4: %s --- q: %s' % (str(len(ls4_tifs)), str(len(q_tifs))))
 
     print('time to compare....')
+    print('ls4 tifs not in Q drive:')
     count = 0
     for l in ls4_deets:
         if l not in q_deets:
             count += 1
-    print('%s ls4 tifs not in Q drive.' % str(count))
+            print(l)
+    print('%s total ls4 tifs not in Q drive.' % str(count))
+    print('q tifs not in ls4:')
     count = 0
     for q in q_deets:
         if q not in ls4_deets:
             count += 1
+            print(q)
     print('%s q tifs not in ls4.' % str(count))
 
 else:
