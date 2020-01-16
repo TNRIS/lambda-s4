@@ -12,6 +12,7 @@ if q_bucket != '' and ls4_bucket != '':
     ls4_deets = []
     q_tifs = []
     q_deets = []
+    tiftif = []
 
     def ls4_run(ct=None, loop=0):
         print('loop: ' + str(loop))
@@ -63,6 +64,13 @@ if q_bucket != '' and ls4_bucket != '':
                 ContinuationToken=ct
             )
         for c in response['Contents']:
+            if (
+                '.tif.tif' in c['Key'] or
+                '.tif.TIF' in c['Key'] or
+                '.TIF.tif' in c['Key'] or
+                '.TIF.TIF' in c['Key']
+            ):
+                tiftif.append(c['Key'])
             if '/Index/' in c['Key']:
                 # find all tifs that are not in the MultiCounty subdirectory
                 # and are not AMS (since AMS are mainly line indexes)
@@ -115,6 +123,10 @@ if q_bucket != '' and ls4_bucket != '':
             count += 1
             print(q)
     print('%s q tifs not in ls4.' % str(count))
+
+    print('Q drive %s double extensions---' % str(len(tiftif)))
+    for tt in tiftif:
+        print(tt)
 
 else:
     print('buckets not declared. populate variables and try again.')
