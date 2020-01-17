@@ -95,7 +95,7 @@ if q_bucket != '' and ls4_bucket != '':
                     arcpy.CopyRaster_management(working_dir + filename_base + '.tif', cog,
                                                 nodata_value='256', format='COG', transform=True)
                     print('uploading converted COG...')
-                    client.upload_file(cog, q_bucket, filename_base.tif)
+                    client.upload_file(cog, q_bucket, filename_base + '.tif')
                     # to do: build bounding box shapefile, upload, create service with mapfile and dbase record
                 except:
                     print arcpy.GetMessages()
