@@ -1,9 +1,13 @@
 import boto3
+import os
+import arcpy
 
 client = boto3.client('s3')
 ls4_bucket = 'tnris-ls4'
 q_bucket = 'tnris-public-data'
+working_dir = '<local working directory>'
 
+# to do: turn off ls4 lambdas for running this bulk process
 
 if q_bucket != '' and ls4_bucket != '':
     ls4_tifs = []
@@ -56,13 +60,48 @@ if q_bucket != '' and ls4_bucket != '':
     total = str(len(ls4_deets))
     counter = 1
     for d in ls4_deets:
-        print('%s/%s' % (str(counter), total))
-        tif = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s.tif' % (d[0], d[1], d[2], d[3])
-        worldfile = tif.replace('.tif', '.tfwx')
-        auxfile = tif + '.aux.xml'
-        overviews = tif + '.ovr'
+        # to do: disable while counter from testing
+        while counter == 1:
+            print('%s/%s' % (str(counter), total))
+            print('clearing working dir...')
+            for f in os.listdir(working_dir):
+                os.remove(os.path.join(working_dir, f))
+            filename_base = '%s_%s_%s' % (d[1], d[2], d[3])
 
-        counter += 1
+            print('downloading tif...')
+            tif = 'prod-historic/Historic_Images/%s/Index/%s.tif' % (d[0], filename_base)
+            client.download_file(q_bucket, tif, working_dir + filename_base + '.tif')
+
+            print('downloading worldfile...')
+            worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
+            client.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfwx')
+
+            print('downloading auxfile...')
+            auxfile = 'prod-historic/Historic_Images/%s/Index/%s.tif.aux.xml' % (d[0], filename_base)
+            client.download_file(q_bucket, auxfile, working_dir + filename_base + '.tif.aux.xml')
+
+            print('downloading overviews...')
+            overviews = 'prod-historic/Historic_Images/%s/Index/%s.tif.ovr' % (d[0], filename_base)
+            client.download_file(q_bucket, overviews, working_dir + filename_base + '.tif.ovr')
+
+            print('check projection...')
+            sr = arcpy.Describe(working_dir + filename_base + '.tif').spatialReference
+            print(sr.factoryCode, sr.name)
+            # to do: handle reprojection of non-3857 rasters
+            if sr.factoryCode == 3857:
+                print('running CopyRaster for conversion...')
+                cog = working_dir + 'out_cog' + filename_base + '.tif'
+                try:
+                    arcpy.CopyRaster_management(working_dir + filename_base + '.tif', cog,
+                                                nodata_value='256', format='COG', transform=True)
+                    print('uploading converted COG...')
+                    client.upload_file(cog, q_bucket, filename_base.tif)
+                    # to do: build bounding box shapefile, upload, create service with mapfile and dbase record
+                except:
+                    print arcpy.GetMessages()
+
+            print('SUCCESS:', q_bucket, tif, working_dir + filename_base + '.tif')
+            counter += 1
 
 else:
     print('bucket not declared. populate variables and try again.')
