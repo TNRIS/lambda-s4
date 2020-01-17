@@ -1,13 +1,13 @@
 import boto3
 import os
 import arcpy
+import json
 
-client = boto3.client('s3')
+client_s3 = boto3.client('s3')
+client_lambda = boto3.client('lambda')
 ls4_bucket = 'tnris-ls4'
 q_bucket = 'tnris-public-data'
 working_dir = '<local working directory>'
-
-# to do: turn off ls4 lambdas for running this bulk process
 
 if q_bucket != '' and ls4_bucket != '':
     ls4_tifs = []
@@ -16,12 +16,12 @@ if q_bucket != '' and ls4_bucket != '':
     def ls4_run(ct=None, loop=0):
         print('loop: ' + str(loop))
         if ct is None:
-            response = client.list_objects_v2(
+            response = client_s3.list_objects_v2(
                 Bucket=ls4_bucket,
                 Prefix='bw/'
             )
         else:
-            response = client.list_objects_v2(
+            response = client_s3.list_objects_v2(
                 Bucket=ls4_bucket,
                 Prefix='bw/',
                 ContinuationToken=ct
@@ -70,19 +70,19 @@ if q_bucket != '' and ls4_bucket != '':
 
             print('downloading tif...')
             tif = 'prod-historic/Historic_Images/%s/Index/%s.tif' % (d[0], filename_base)
-            client.download_file(q_bucket, tif, working_dir + filename_base + '.tif')
+            client_s3.download_file(q_bucket, tif, working_dir + filename_base + '.tif')
 
             print('downloading worldfile...')
             worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
-            client.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfwx')
+            client_s3.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfwx')
 
             print('downloading auxfile...')
             auxfile = 'prod-historic/Historic_Images/%s/Index/%s.tif.aux.xml' % (d[0], filename_base)
-            client.download_file(q_bucket, auxfile, working_dir + filename_base + '.tif.aux.xml')
+            client_s3.download_file(q_bucket, auxfile, working_dir + filename_base + '.tif.aux.xml')
 
             print('downloading overviews...')
             overviews = 'prod-historic/Historic_Images/%s/Index/%s.tif.ovr' % (d[0], filename_base)
-            client.download_file(q_bucket, overviews, working_dir + filename_base + '.tif.ovr')
+            client_s3.download_file(q_bucket, overviews, working_dir + filename_base + '.tif.ovr')
 
             print('check projection...')
             sr = arcpy.Describe(working_dir + filename_base + '.tif').spatialReference
@@ -95,8 +95,20 @@ if q_bucket != '' and ls4_bucket != '':
                     arcpy.CopyRaster_management(working_dir + filename_base + '.tif', cog,
                                                 nodata_value='256', format='COG', transform=True)
                     print('uploading converted COG...')
-                    client.upload_file(cog, q_bucket, filename_base + '.tif')
-                    # to do: build bounding box shapefile, upload, create service with mapfile and dbase record
+                    upload_key = 'bw/%s/%s_%s/index/cog/%s.tif' % (d[0], d[1], d[2], filename_base)
+                    client_s3.upload_file(cog, ls4_bucket, upload_key,
+                                          ExtraArgs={
+                                              'ACL': 'public-read',
+                                              'ContentType': 'image/tiff'
+                                          })
+                    print('invoking ls4-04-shp_index lambda...')
+                    payload = {'sourceBucket': ls4_bucket, 'sourceKey': upload_key}
+                    response = client_lambda.invoke(
+                        FunctionName='ls4-04-shp_index',
+                        InvocationType='Event',
+                        Payload=json.dumps(payload)
+                    )
+                    print('success:', upload_key)
                 except:
                     print arcpy.GetMessages()
 
@@ -105,6 +117,5 @@ if q_bucket != '' and ls4_bucket != '':
 
 else:
     print('bucket not declared. populate variables and try again.')
-
 
 print("that's all folks!!")
