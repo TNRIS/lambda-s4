@@ -1,80 +1,71 @@
 import boto3
-import gdal
-import requests
-import json
 
 client = boto3.client('s3')
-bucket = 'tnris-public-data'
+ls4_bucket = 'tnris-ls4'
+q_bucket = 'tnris-public-data'
 
 
-colls = requests.get("https://api.tnris.org/api/v1/historical/collections")
-all_colls = colls.json()['results']
-more_colls = requests.get("https://api.tnris.org/api/v1/historical/collections?limit=1000&offset=1000")
-all_colls.extend(more_colls.json()['results'])
-print('total lore public collection count: ' + str(len(all_colls)))
-# lore = []
-# for c in all_colls:
-#     if c['index_service_url'] is not None:
-#         links = json.loads("[%s]" % c['scanned_index_ls4_links'])
-#         for l in links:
-#             dl = l['link'].replace("https://s3.amazonaws.com/tnris-ls4/","").replace("https://tnris-ls4.s3.amazonaws.com/","")
-#             lore.append(dl)
-#             # print(dl)
-# print('total lore scanned index ls4 links count: ' + str(len(lore)))
+if q_bucket != '' and ls4_bucket != '':
+    ls4_tifs = []
+    ls4_deets = []
 
-if bucket != '':
-    contents = []
-    tifs = []
-
-    def run(ct=None, loop=0):
+    def ls4_run(ct=None, loop=0):
         print('loop: ' + str(loop))
         if ct is None:
             response = client.list_objects_v2(
-                Bucket=bucket,
-                Prefix='prod-historic/Historic_Images/'
+                Bucket=ls4_bucket,
+                Prefix='bw/'
             )
         else:
             response = client.list_objects_v2(
-                Bucket=bucket,
-                Prefix='prod-historic/Historic_Images/',
+                Bucket=ls4_bucket,
+                Prefix='bw/',
                 ContinuationToken=ct
             )
         for c in response['Contents']:
-            if '/Index/' in c['Key']:
-                contents.append(c['Key'])
-                # find all tifs that are not in the MultiCounty subdirectory
-                # and are not AMS (since AMS are mainly line indexes)
-                # and are not line indexes (LI) at all
-                if (
-                    c['Key'][-4:] == '.tif'
-                    or c['Key'][-4:] == '.TIF'
-                    ) and 'MultiCounty' not in c['Key'] and 'AMS' not in c['Key'] and '_LI_' not in c['Key']:
-                    tifs.append(c['Key'])
-                if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
-                    print(c['Key'])
+            if '/index/scanned/' in c['Key'] and (
+                    c['Key'][-4:] == '.tif' or
+                    c['Key'][-4:] == '.TIF'):
+                ls4_tifs.append(c['Key'])
+            
+                county = c['Key'].split('/')[1]
+                filename = c['Key'].split('/')[-1].replace('.tif', '').replace('.TIF', '')
+                agency = filename.split('_')[0]
+                year = filename.split('_')[1]
+                sheet = filename.split('_')[2]
+                ls4_deets.append([county, agency, year, sheet])
+                # print(county, agency, year, sheet)
+            if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
+                    print('what the TIF???' + c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
-            run(response['NextContinuationToken'], loop)
+            ls4_run(response['NextContinuationToken'], loop)
         else:
-            print('contents compiled. index files key count: ' + str(len(contents)))
-            print('index file .tif key count: ' + str(len(tifs)))
-            return 
+            print('index scans .tif key count: ' + str(len(ls4_tifs)))
+            return
 
-    print('compiling contents...')
-    run()
+    print('compiling LS4 drive contents...')
+    ls4_run()
+    
+    print('totals---')
+    print('ls4 tifs: %s' % (str(len(ls4_tifs))))
+    print('ls4 deets: %s' % (str(len(ls4_deets))))
 
-    # print('epsg check...')
-    # for key in tifs:
-    #     s3_path = '/vsis3/' + bucket + '/' + key
-    #     try:
-    #         epsg = int(gdal.Info(s3_path, format='json')['coordinateSystem']['wkt'].rsplit('"EPSG","', 1)[-1].split('"')[0])
-    #         print(epsg)
-    #     except:
-    #         print('bad epsg --' + gdal.Info(s3_path, format='json')['coordinateSystem']['wkt'] + '-- ' + key)
+    print('time to process....')
+    total = str(len(ls4_deets))
+    counter = 1
+    for d in ls4_deets:
+        print('%s/%s' % (str(counter), total))
+        tif = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s.tif' % (d[0], d[1], d[2], d[3])
+        worldfile = tif.replace('.tif', '.tfwx')
+        auxfile = tif + '.aux.xml'
+        overviews = tif + '.ovr'
+
+        counter += 1
 
 else:
-    print('no bucket declared. populate variable and try again.')
+    print('bucket not declared. populate variables and try again.')
 
 
 print("that's all folks!!")
