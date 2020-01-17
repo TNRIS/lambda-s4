@@ -15,7 +15,7 @@ if q_bucket != '' and ls4_bucket != '':
     tiftif = []
 
     def ls4_run(ct=None, loop=0):
-        print('loop: ' + str(loop))
+        # print('loop: ' + str(loop))
         if ct is None:
             response = client.list_objects_v2(
                 Bucket=ls4_bucket,
@@ -51,7 +51,7 @@ if q_bucket != '' and ls4_bucket != '':
             return 
 
     def q_run(ct=None, loop=0):
-        print('loop: ' + str(loop))
+        # print('loop: ' + str(loop))
         if ct is None:
             response = client.list_objects_v2(
                 Bucket=q_bucket,
