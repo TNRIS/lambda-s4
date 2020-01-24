@@ -1,6 +1,7 @@
 import boto3
 import os
 import arcpy
+import requests
 import json
 
 client_s3 = boto3.client('s3')
@@ -31,17 +32,17 @@ if q_bucket != '' and ls4_bucket != '':
                     c['Key'][-4:] == '.tif' or
                     c['Key'][-4:] == '.TIF'):
                 ls4_tifs.append(c['Key'])
-            
+
                 county = c['Key'].split('/')[1]
                 filename = c['Key'].split('/')[-1].replace('.tif', '').replace('.TIF', '')
                 agency = filename.split('_')[0]
                 year = filename.split('_')[1]
                 sheet = filename.split('_')[2]
-                ls4_deets.append([county, agency, year, sheet])
-                # print(county, agency, year, sheet)
+                ls4_deets.append([county, agency, year, sheet, c['Key']])
+                # print(county, agency, year, sheet, c['Key'])
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
-                
+
         loop += 1
         if response['IsTruncated'] is True:
             ls4_run(response['NextContinuationToken'], loop)
@@ -51,7 +52,7 @@ if q_bucket != '' and ls4_bucket != '':
 
     print('compiling LS4 drive contents...')
     ls4_run()
-    
+
     print('totals---')
     print('ls4 tifs: %s' % (str(len(ls4_tifs))))
     print('ls4 deets: %s' % (str(len(ls4_deets))))
@@ -101,6 +102,8 @@ if q_bucket != '' and ls4_bucket != '':
                                               'ACL': 'public-read',
                                               'ContentType': 'image/tiff'
                                           })
+                    print('cog upload success:', upload_key)
+
                     print('invoking ls4-04-shp_index lambda...')
                     payload = {'sourceBucket': ls4_bucket, 'sourceKey': upload_key}
                     response = client_lambda.invoke(
@@ -108,11 +111,40 @@ if q_bucket != '' and ls4_bucket != '':
                         InvocationType='Event',
                         Payload=json.dumps(payload)
                     )
-                    print('success:', upload_key)
-                except:
-                    print arcpy.GetMessages()
+                    print(response)
 
-            print('SUCCESS:', q_bucket, tif, working_dir + filename_base + '.tif')
+                    print('using api to find collection_id...')
+                    url_string = "https://api.tnris.org/api/v1/historical/collections?scanned_index_ls4_links__icontains=s3.amazonaws.com/tnris-ls4/%s" % (d[4])
+                    print(url_string)
+                    api_res = requests.get(url_string).json()['results']
+                    if len(api_res) != 1:
+                        print('%s collections contain the same scanned index ls4 link url' % str(len(api_res)))
+                        print(api_res)
+                        raise ValueError
+                    collection_id = api_res[0]['collection_id']
+
+                    print('updating LORE Index Service URL field for collection_id %s...' % collection_id)
+                    print('invoking api-tnris-org-update_database_record_utility lambda...')
+                    mapfile_url = "http://mapserver.tnris.org/wms/?map=/mapfiles/%s_%s_%s_index.map" % (
+                                    d[0].lower(), d[1].lower(), d[2])
+                    where = "id = '%s'" % collection_id
+                    payload = {
+                        'table': 'historical_collection',
+                        'field': 'index_service_url',
+                        'value': mapfile_url,
+                        'where': where
+                    }
+                    response = client_lambda.invoke(
+                        FunctionName='api-tnris-org-update_database_record_utility',
+                        InvocationType='Event',
+                        Payload=json.dumps(payload)
+                    )
+                    print(response)
+
+                except:
+                    print(arcpy.GetMessages())
+
+            print('INDEX SHEET FINAL SUCCESS:', q_bucket, tif, working_dir + filename_base + '.tif')
             counter += 1
 
 else:
