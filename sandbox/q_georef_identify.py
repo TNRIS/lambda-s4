@@ -35,9 +35,11 @@ if q_bucket != '' and ls4_bucket != '':
                 agency = filename.split('_')[0]
                 year = filename.split('_')[1]
                 sheet = filename.split('_')[2]
-                ls4_deets.append([county, agency, year, sheet])
-                if 'dpi' in c['Key'] or 'DPI' in c['Key']:
-                    print(c['Key'])
+                try:
+                    dpi = filename.split('_')[3]
+                    ls4_deets.append([county, agency, year, sheet, dpi])
+                except:
+                    ls4_deets.append([county, agency, year, sheet])
                 # print(county, agency, year, sheet)
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
@@ -92,32 +94,32 @@ if q_bucket != '' and ls4_bucket != '':
     print('ls4: %s --- q: %s' % (str(len(ls4_tifs)), str(len(q_tifs))))
 
     print('time to compare....')
-    wf = []
-    af = []
-    ov = []
-    counter = 1
-    for t in q_tifs:
-        # print('%s/%s' % (str(counter), str(len(q_tifs))))
-        worldfile = t.replace('.tif', '.tfwx')
-        tfw = t.replace('.tif', '.tfw')
-        if worldfile not in q_index_keys and tfw not in q_index_keys:
-            # print('missing worldfile: ' + t)
-            wf.append(t)
+    # wf = []
+    # af = []
+    # ov = []
+    # counter = 1
+    # for t in q_tifs:
+    #     # print('%s/%s' % (str(counter), str(len(q_tifs))))
+    #     worldfile = t.replace('.tif', '.tfwx')
+    #     tfw = t.replace('.tif', '.tfw')
+    #     if worldfile not in q_index_keys and tfw not in q_index_keys:
+    #         # print('missing worldfile: ' + t)
+    #         wf.append(t)
         
-        auxfile = t + '.aux.xml'
-        if auxfile not in q_index_keys:
-            # print('missing auxfile: ' + t)
-            af.append(t)
+    #     auxfile = t + '.aux.xml'
+    #     if auxfile not in q_index_keys:
+    #         # print('missing auxfile: ' + t)
+    #         af.append(t)
 
-        overviews = t + '.ovr'
-        if overviews not in q_index_keys:
-            # print('missing overviews: ' + t)
-            ov.append(t)
+    #     overviews = t + '.ovr'
+    #     if overviews not in q_index_keys:
+    #         # print('missing overviews: ' + t)
+    #         ov.append(t)
 
-        counter += 1
-    print('missing Q georef totals---')
-    print('worldfiles/auxfiles/overviews')
-    print('%s/%s/%s' % (str(len(wf)), str(len(af)), str(len(ov))))
+    #     counter += 1
+    # print('missing Q georef totals---')
+    # print('worldfiles/auxfiles/overviews')
+    # print('%s/%s/%s' % (str(len(wf)), str(len(af)), str(len(ov))))
     
     ls4_not_georef = []
     wf = []
@@ -126,7 +128,10 @@ if q_bucket != '' and ls4_bucket != '':
     counter = 1
     for d in ls4_deets:
         # print('%s/%s' % (str(counter), str(len(ls4_deets))))
-        keypath = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s.tif' % (d[0], d[1], d[2], d[3])
+        try:
+            keypath = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s_%s.tif' % (d[0], d[1], d[2], d[3], d[4])
+        except:
+            keypath = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s.tif' % (d[0], d[1], d[2], d[3])
         worldfile = keypath.replace('.tif', '.tfwx')
         tfw = keypath.replace('.tif', '.tfw')
         if worldfile not in q_index_keys and tfw not in q_index_keys:
