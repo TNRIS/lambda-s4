@@ -132,26 +132,33 @@ if q_bucket != '' and ls4_bucket != '':
             keypath = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s_%s.tif' % (d[0], d[1], d[2], d[3], d[4])
         except:
             keypath = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s.tif' % (d[0], d[1], d[2], d[3])
+        
+        flag = False
+        if keypath not in q_index_keys:
+            flag = True
+            print('missing tif keypath: ' + keypath)
+
         worldfile = keypath.replace('.tif', '.tfwx')
         tfw = keypath.replace('.tif', '.tfw')
-        if worldfile not in q_index_keys and tfw not in q_index_keys:
-            # print('missing worldfile: ' + keypath)
-            wf.append(keypath)
-        
-        auxfile = keypath + '.aux.xml'
-        if auxfile not in q_index_keys:
-            # print('missing auxfile: ' + keypath)
-            af.append(keypath)
+        if worldfile not in q_index_keys:
+            if tfw not in q_index_keys:
+                print('missing worldfile: ' + tfw)
+                wf.append(keypath)
+                flag = True
+        else:
+            auxfile = keypath + '.aux.xml'
+            if auxfile not in q_index_keys:
+                print('missing auxfile: ' + auxfile)
+                af.append(keypath)
+                flag = True
 
         overviews = keypath + '.ovr'
         if overviews not in q_index_keys:
-            # print('missing overviews: ' + keypath)
+            print('missing overviews: ' + overviews)
             ov.append(keypath)
+            flag = True
 
-        if (
-            (worldfile not in q_index_keys and tfw not in q_index_keys) or
-            auxfile not in q_index_keys or
-            overviews not in q_index_keys):
+        if flag:
             ls4_not_georef.append(d)
 
         counter += 1
