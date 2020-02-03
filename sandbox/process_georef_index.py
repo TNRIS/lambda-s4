@@ -1,4 +1,5 @@
 import boto3
+from botocore.errorfactory import ClientError
 import os
 import arcpy
 import requests
@@ -76,19 +77,25 @@ if q_bucket != '' and ls4_bucket != '':
             if len(d) == 6:
                 filename_base = '%s_%s_%s_%s' % (d[1], d[2], d[3], d[5])
 
-            # TO DO: handle tfw vs tfwx worldfiles!!!
-
             print('downloading tif...')
             tif = 'prod-historic/Historic_Images/%s/Index/%s.tif' % (d[0], filename_base)
             client_s3.download_file(q_bucket, tif, working_dir + filename_base + '.tif')
 
-            print('downloading worldfile...')
-            worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
-            client_s3.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfwx')
+            try:
+                # try to download tfw file.
+                client_s3.head_object(Bucket=q_bucket, Key='prod-historic/Historic_Images/%s/Index/%s.tfw' % (d[0], filename_base))
+                print('downloading worldfile tfw...')
+                worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
+                client_s3.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfw')
+            except ClientError:
+                # if fails, then assume tfwx and download along with auxfile
+                print('downloading worldfile tfwx...')
+                worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
+                client_s3.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfwx')
 
-            print('downloading auxfile...')
-            auxfile = 'prod-historic/Historic_Images/%s/Index/%s.tif.aux.xml' % (d[0], filename_base)
-            client_s3.download_file(q_bucket, auxfile, working_dir + filename_base + '.tif.aux.xml')
+                print('downloading auxfile...')
+                auxfile = 'prod-historic/Historic_Images/%s/Index/%s.tif.aux.xml' % (d[0], filename_base)
+                client_s3.download_file(q_bucket, auxfile, working_dir + filename_base + '.tif.aux.xml')
 
             print('downloading overviews...')
             overviews = 'prod-historic/Historic_Images/%s/Index/%s.tif.ovr' % (d[0], filename_base)
