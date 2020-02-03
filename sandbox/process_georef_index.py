@@ -38,8 +38,11 @@ if q_bucket != '' and ls4_bucket != '':
                 agency = filename.split('_')[0]
                 year = filename.split('_')[1]
                 sheet = filename.split('_')[2]
-                ls4_deets.append([county, agency, year, sheet, c['Key']])
-                # TO DO: handle _XXXdpi filenames!!!
+                try:
+                    dpi = filename.split('_')[3]
+                    ls4_deets.append([county, agency, year, sheet, c['Key'], dpi])
+                except:
+                    ls4_deets.append([county, agency, year, sheet, c['Key']])
                 # print(county, agency, year, sheet, c['Key'])
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
@@ -69,13 +72,15 @@ if q_bucket != '' and ls4_bucket != '':
             for f in os.listdir(working_dir):
                 os.remove(os.path.join(working_dir, f))
             filename_base = '%s_%s_%s' % (d[1], d[2], d[3])
+            upload_base = filename_base
+            if len(d) == 6:
+                filename_base = '%s_%s_%s_%s' % (d[1], d[2], d[3], d[5])
 
-        # TO DO: handle _XXXdpi filenames!!!
-        # TO DO: handle tfw vs tfwx worldfiles!!!
+            # TO DO: handle tfw vs tfwx worldfiles!!!
 
-        print('downloading tif...')
-        tif = 'prod-historic/Historic_Images/%s/Index/%s.tif' % (d[0], filename_base)
-        client_s3.download_file(q_bucket, tif, working_dir + filename_base + '.tif')
+            print('downloading tif...')
+            tif = 'prod-historic/Historic_Images/%s/Index/%s.tif' % (d[0], filename_base)
+            client_s3.download_file(q_bucket, tif, working_dir + filename_base + '.tif')
 
             print('downloading worldfile...')
             worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
@@ -111,7 +116,7 @@ if q_bucket != '' and ls4_bucket != '':
                 arcpy.CopyRaster_management(copy_raster_input, cog,
                                             nodata_value='256', format='COG', transform=True)
                 print('uploading converted COG...')
-                upload_key = 'bw/%s/%s_%s/index/cog/%s.tif' % (d[0], d[1], d[2], filename_base)
+                upload_key = 'bw/%s/%s_%s/index/cog/%s.tif' % (d[0], d[1], d[2], upload_base)
                 client_s3.upload_file(cog, ls4_bucket, upload_key,
                                       ExtraArgs={
                                           'ACL': 'public-read',
