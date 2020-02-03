@@ -97,7 +97,8 @@ if q_bucket != '' and ls4_bucket != '':
     for t in q_tifs:
         # print('%s/%s' % (str(counter), str(len(q_tifs))))
         worldfile = t.replace('.tif', '.tfwx')
-        if worldfile not in q_index_keys:
+        tfw = t.replace('.tif', '.tfw')
+        if worldfile not in q_index_keys and tfw not in q_index_keys:
             # print('missing worldfile: ' + t)
             wf.append(t)
         
@@ -125,7 +126,8 @@ if q_bucket != '' and ls4_bucket != '':
         # print('%s/%s' % (str(counter), str(len(ls4_deets))))
         keypath = 'prod-historic/Historic_Images/%s/Index/%s_%s_%s.tif' % (d[0], d[1], d[2], d[3])
         worldfile = keypath.replace('.tif', '.tfwx')
-        if worldfile not in q_index_keys:
+        tfw = keypath.replace('.tif', '.tfw')
+        if worldfile not in q_index_keys and tfw not in q_index_keys:
             # print('missing worldfile: ' + keypath)
             wf.append(keypath)
         
@@ -140,7 +142,7 @@ if q_bucket != '' and ls4_bucket != '':
             ov.append(keypath)
 
         if (
-            worldfile not in q_index_keys or
+            (worldfile not in q_index_keys and tfw not in q_index_keys) or
             auxfile not in q_index_keys or
             overviews not in q_index_keys):
             ls4_not_georef.append(d)
