@@ -36,6 +36,8 @@ if q_bucket != '' and ls4_bucket != '':
                 year = filename.split('_')[1]
                 sheet = filename.split('_')[2]
                 ls4_deets.append([county, agency, year, sheet])
+                if 'dpi' in c['Key'] or 'DPI' in c['Key']:
+                    print(c['Key'])
                 # print(county, agency, year, sheet)
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])

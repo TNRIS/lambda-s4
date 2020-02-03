@@ -39,6 +39,7 @@ if q_bucket != '' and ls4_bucket != '':
                 year = filename.split('_')[1]
                 sheet = filename.split('_')[2]
                 ls4_deets.append([county, agency, year, sheet, c['Key']])
+                # TO DO: handle _XXXdpi filenames!!!
                 # print(county, agency, year, sheet, c['Key'])
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
@@ -66,6 +67,9 @@ if q_bucket != '' and ls4_bucket != '':
         for f in os.listdir(working_dir):
             os.remove(os.path.join(working_dir, f))
         filename_base = '%s_%s_%s' % (d[1], d[2], d[3])
+
+        # TO DO: handle _XXXdpi filenames!!!
+        # TO DO: handle tfw vs tfwx worldfiles!!!
 
         print('downloading tif...')
         tif = 'prod-historic/Historic_Images/%s/Index/%s.tif' % (d[0], filename_base)
