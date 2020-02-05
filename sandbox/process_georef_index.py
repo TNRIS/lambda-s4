@@ -29,7 +29,8 @@ if q_bucket != '' and ls4_bucket != '':
                 ContinuationToken=ct
             )
         for c in response['Contents']:
-            if '/index/scanned/' in c['Key'] and (
+            # ignore USAF!
+            if '/index/scanned/' in c['Key'] and 'USAF' not in c['Key'] and (
                     c['Key'][-4:] == '.tif' or
                     c['Key'][-4:] == '.TIF'):
                 ls4_tifs.append(c['Key'])
@@ -47,6 +48,8 @@ if q_bucket != '' and ls4_bucket != '':
                 # print(county, agency, year, sheet, c['Key'])
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
+            if 'USAF' in c['Key']:
+                print('USAF Ugh:', c['Key'])
 
         loop += 1
         if response['IsTruncated'] is True:
