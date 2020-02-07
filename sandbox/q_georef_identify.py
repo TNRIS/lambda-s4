@@ -44,8 +44,8 @@ if q_bucket != '' and ls4_bucket != '':
                 # print(county, agency, year, sheet)
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                 print('what the TIF???' + c['Key'])
-            if 'USAF' in c['Key']:
-                print('USAF Ugh: '+ c['Key'])
+            # if 'USAF' in c['Key']:
+            #     print('USAF Ugh: '+ c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
@@ -81,8 +81,8 @@ if q_bucket != '' and ls4_bucket != '':
                     q_tifs.append(c['Key'])
                 if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
-                if 'USAF' in c['Key']:
-                    print('USAF Ugh: '+ c['Key'])
+                # if 'USAF' in c['Key']:
+                #     print('USAF Ugh: '+ c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
