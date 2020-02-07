@@ -65,6 +65,9 @@ if q_bucket != '' and ls4_bucket != '':
     print('ls4 tifs: %s' % (str(len(ls4_tifs))))
     print('ls4 deets: %s' % (str(len(ls4_deets))))
 
+    print('complete list, in case we need to clear out this run---')
+    print(ls4_deets)
+
     print('time to process....')
     total = str(len(ls4_deets))
     counter = 1
