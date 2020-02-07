@@ -24,8 +24,10 @@ yet-to-be-processed in Q bucket (current exceptions written into qc scripts):
 
 
 TO DO:
-1. write QC script to identify all variations of AMMANN agency. list for RDC to fix. title case, all caps, and alternative spellings all exist
-2. write QC script to identify lists of all yet-to-be-procesed exceptions. each individual list will be separate cleanup and processing workflow.
+1. write verification count QC script to verify all was processed successfully
+2. update processing script to identify # of collections being processed, not just # of sheets
+3. write QC script to identify all variations of AMMANN agency. list for RDC to fix. title case, all caps, and alternative spellings all exist
+4. write QC script to identify lists of all yet-to-be-procesed exceptions. each individual list will be separate cleanup and processing workflow.
 
 
 To re-run script, need to:
