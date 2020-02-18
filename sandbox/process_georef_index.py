@@ -93,7 +93,7 @@ if q_bucket != '' and ls4_bucket != '':
                     # try to download tfw file.
                     client_s3.head_object(Bucket=q_bucket, Key='prod-historic/Historic_Images/%s/Index/%s.tfw' % (d[0], filename_base))
                     print('downloading worldfile tfw...')
-                    worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfwx' % (d[0], filename_base)
+                    worldfile = 'prod-historic/Historic_Images/%s/Index/%s.tfw' % (d[0], filename_base)
                     client_s3.download_file(q_bucket, worldfile, working_dir + filename_base + '.tfw')
                 except ClientError:
                     # if fails, then assume tfwx and download along with auxfile
