@@ -28,7 +28,8 @@ if q_bucket != '' and ls4_bucket != '':
                 ContinuationToken=ct
             )
         for c in response['Contents']:
-            if '/index/scanned/' in c['Key'] and (
+            # ignore USAF!
+            if '/index/scanned/' in c['Key'] and 'USAF' not in c['Key'] and (
                     c['Key'][-4:] == '.tif' or
                     c['Key'][-4:] == '.TIF'):
                 ls4_tifs.append(c['Key'])
@@ -42,6 +43,8 @@ if q_bucket != '' and ls4_bucket != '':
                 # print(county, agency, year, sheet)
             if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
+            # if 'USAF' in c['Key']:
+            #     print('USAF Ugh: '+ c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
@@ -74,11 +77,12 @@ if q_bucket != '' and ls4_bucket != '':
             if '/Index/' in c['Key']:
                 # find all tifs that are not in the MultiCounty subdirectory
                 # and are not AMS (since AMS are mainly line indexes)
+                # and are not USAF (since USAF are special cases)
                 # and are not line indexes (LI) at all
                 if (
                     c['Key'][-4:] == '.tif'
                     or c['Key'][-4:] == '.TIF'
-                    ) and 'MultiCounty' not in c['Key'] and 'AMS' not in c['Key'] and '_LI_' not in c['Key']:
+                    ) and 'MultiCounty' not in c['Key'] and 'AMS' not in c['Key'] and 'USAF' not in c['Key'] and '_LI_' not in c['Key']:
                     q_tifs.append(c['Key'])
                     try:
                         county = c['Key'].split('/')[2]
@@ -92,6 +96,8 @@ if q_bucket != '' and ls4_bucket != '':
                         print('issue getting county, agency, year, & sheet:' + c['Key'])
                 if c['Key'][-4:] == '.TIF' or c['Key'][-4:] == '.TIFF' or c['Key'][-4:] == '.tiff':
                     print('what the TIF???' + c['Key'])
+                # if 'USAF' in c['Key']:
+                #     print('USAF Ugh: '+ c['Key'])
                 
         loop += 1
         if response['IsTruncated'] is True:
