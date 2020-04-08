@@ -67,3 +67,5 @@ ls4-compile_indexes/*
 data/test/reproj/
 
 gdalmanylinux/
+
+sandbox/mvt/*
