@@ -82,9 +82,9 @@ def lambda_handler(event, context):
             agency = ''
 
         location = key
-        dl_orig = key.replace('/vsis3/', 'https://s3.amazonaws.com/').replace('cog/', 'scanned/')
-        dl_georef = key.replace('/vsis3/', 'https://s3.amazonaws.com/')
-        dl_index = 'https://s3.amazonaws.com/' + source_bucket + '/' + shp_key + '_idx.zip'
+        dl_orig = key.replace('/vsis3/tnris-ls4/', 'https://cdn.tnris.org/').replace('cog/', 'scanned/')
+        dl_georef = key.replace('/vsis3/tnris-ls4/', 'https://cdn.tnris.org/')
+        dl_index = 'https://cdn.tnris.org/' + shp_key + '_idx.zip'
 
         frame_name = key.split('/')[-1].replace('.tif','')
         if 'mosaic' not in frame_name and '/mosaic/' not in key and '/index/' not in key and '/StratMap/' not in key:
