@@ -52,7 +52,7 @@ The Workflow of lambda functions maintain the imagery and mapfiles for all the s
 
 * `ls4-maintenance` is a Cloudwatch scheduled lambda function which runs every 24 hours and performs simple validation checks accross the project infrastructure. If invalid situations are identified, the function handles any deletions as necessary and then notifys a project SNS topic for developer awareness and potential follow up.
 
-* `ls4-compile_indexes` is a Cloudwatch scheduled lambda function which runs every hour to collect the tile indexes from the RDS database and collect them into a single .geojson file and dumps it into S3. Carto then sync's with this file in S3 to provide a comprehensive index dataset of all imagery processed by the engine.
+* `ls4-compile_indexes` is a Cloudwatch scheduled lambda function which runs every hour to collect the tile indexes from the RDS database and collect them into a single .geojson file and dumps it into S3. Provides a comprehensive index dataset of all historical imagery processed by the engine.
 
 ---
 
